@@ -1,4 +1,5 @@
 ![logo](https://github.com/Petrovich-A/TaskWizard/blob/main/src/main/resources/static/logo.png)
+<br />
 ## Table of Contents
 - [About the Project](#about-the-project)
 - [Tech Stack](#tech-stack)
@@ -55,18 +56,18 @@ This project showcases my ability to design and implement a real-world RESTful s
 
 1. Clone the repository:
 
-```bash
+   ```bash
    git clone https://github.com/yourusername/task-management-system.git
    cd task-management-system
-```
+   ```
 
 2. Configure your database connection in `src/main/resources/application.properties`:
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/taskwizard
-spring.datasource.username=your_db_user
-spring.datasource.password=your_db_password
-```
+   ```properties
+   spring.datasource.url=jdbc:postgresql://localhost:5432/taskwizard
+   spring.datasource.username=your_db_user
+   spring.datasource.password=your_db_password
+   ```
 
 3. (Optional) Adjust JWT and security settings if needed.
 
@@ -93,6 +94,8 @@ This will launch the database and the Spring Boot app.
 2. Build the project:
 
 ```bash
+./mvnw clean install
+# or for Gradle
 ./gradlew build
 ```
 
