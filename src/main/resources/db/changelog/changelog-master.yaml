@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changeset/001__CreateTaskStatusTable.sql
+  - include:
+      file: db/changelog/changeset/002__PopulateTaskStatusTable.sql
+  - include:
+      file: db/changelog/changeset/003__CreateTaskPriorityTable.sql
+  - include:
+      file: db/changelog/changeset/004__PopulateTaskPriorityTable.sql
+  - include:
+      file: db/changelog/changeset/005__CreateUserTable.sql
+  - include:
+      file: db/changelog/changeset/006__PopulateUserTable.sql
+  - include:
+      file: db/changelog/changeset/007__CreateTaskTable.sql
+  - include:
+      file: db/changelog/changeset/008__PopulateTaskTable.sql
