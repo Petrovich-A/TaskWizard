@@ -1,5 +1,6 @@
 package by.petrovich.taskwizard.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,8 +26,8 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
-@ToString
+@EqualsAndHashCode(exclude = {"authoredTasks", "assignedTasks"})
+@ToString(exclude = {"authoredTasks", "assignedTasks"})
 @Entity
 @Table(name = "users")
 public class User {
@@ -53,9 +54,9 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Task> authoredTasks;
 
-    @OneToMany(mappedBy = "assignee", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "assignee", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Task> assignedTasks;
 }
