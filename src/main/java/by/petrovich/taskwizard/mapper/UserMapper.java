@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedSourcePolicy = ReportingPolicy.IGNORE)
@@ -16,11 +17,14 @@ public interface UserMapper {
     @Mapping(target = "assignedTaskIds", source = "assignedTasks")
     UserResponseDto toResponseDto(User user);
 
-    @Mapping(target = "authoredTasks", source = "authoredTaskIds")
-    @Mapping(target = "assignedTasks", source = "assignedTaskIds")
     User toEntity(UserRequestDto userRequestDto);
+
     @Mapping(target = "id", ignore = true)
     User toEntityUpdate(UserRequestDto userRequestDto, @MappingTarget User user);
+
+    @Mapping(target = "id", source = "id")
+    @Named("mapUser")
+    User mapUser(Long id);
 
     default Task map(Long id) {
         if (id == null) {
@@ -36,6 +40,16 @@ public interface UserMapper {
             return null;
         }
         return task.getId();
+    }
+
+    @Named("toAuthorName")
+    default String toAuthorName(User user) {
+        return user != null ? user.getName() : null;
+    }
+
+    @Named("toAssigneeName")
+    default String toAssigneeName(User user) {
+        return user != null ? user.getName() : null;
     }
 
 }
