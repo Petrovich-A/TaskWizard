@@ -76,28 +76,56 @@ public class TaskServiceImpl implements TaskService {
 
         taskMapper.toEntityUpdate(taskRequestDto, task);
 
-        task.setTaskStatus(getReference(TaskStatus.class, taskRequestDto.getTaskStatusId()));
-        task.setTaskPriority(getReference(TaskPriority.class, taskRequestDto.getTaskPriorityId()));
-        task.setAuthor(getReference(User.class, taskRequestDto.getAuthorId()));
-        task.setAssignee(getReference(User.class, taskRequestDto.getAssigneeId()));
+        Task saved = taskRepository.saveAndFlush(task);
+        return taskMapper.toResponseDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public TaskResponseDto updateStatus(Long id, Long statusId) throws TaskNotFoundException, TaskStatusNotFoundException {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
+
+        task.setTaskStatus(getReference(TaskStatus.class, statusId));
 
         Task saved = taskRepository.saveAndFlush(task);
         return taskMapper.toResponseDto(saved);
     }
 
     @Override
-    public TaskResponseDto updateTaskAuthor(Long taskId, Long userId) throws TaskNotFoundException, UserNotFoundException {
-        return null;
+    @Transactional
+    public TaskResponseDto updatePriority(Long id, Long priorityId) throws TaskNotFoundException, TaskPriorityNotFoundException {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
+
+        task.setTaskPriority(getReference(TaskPriority.class, priorityId));
+
+        Task saved = taskRepository.saveAndFlush(task);
+        return taskMapper.toResponseDto(saved);
     }
 
     @Override
-    public TaskResponseDto updateTaskStatus(Long taskId, Long statusId) throws TaskNotFoundException, TaskStatusNotFoundException {
-        return null;
+    @Transactional
+    public TaskResponseDto updateAuthor(Long id, Long userId) throws TaskNotFoundException, UserNotFoundException {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
+
+        task.setAuthor(getReference(User.class, userId));
+
+        Task saved = taskRepository.saveAndFlush(task);
+        return taskMapper.toResponseDto(saved);
     }
 
     @Override
-    public TaskResponseDto updateTaskPriority(Long taskId, Long priorityId) throws TaskNotFoundException, TaskPriorityNotFoundException {
-        return null;
+    @Transactional
+    public TaskResponseDto updateAssignee(Long id, Long userId) throws TaskNotFoundException, UserNotFoundException {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("Task not found"));
+
+        task.setAssignee(getReference(User.class, userId));
+
+        Task saved = taskRepository.saveAndFlush(task);
+        return taskMapper.toResponseDto(saved);
     }
 
     private <T> T getReference(Class<T> clazz, Long id) {

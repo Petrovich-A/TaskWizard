@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -66,6 +67,26 @@ public class TaskController {
     public ResponseEntity<TaskResponseDto> update(@PathVariable @Positive Long id,
                                                   @RequestBody @Valid TaskRequestDto TaskRequestDto) {
         return ResponseEntity.status(OK).body(taskService.update(id, TaskRequestDto));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<TaskResponseDto> updateStatus(@PathVariable @Positive Long id, @RequestParam Long statusId) {
+        return ResponseEntity.status(OK).body(taskService.updateStatus(id, statusId));
+    }
+
+    @PatchMapping("/{id}/priority")
+    public ResponseEntity<TaskResponseDto> updatePriority(@PathVariable @Positive Long id, @RequestParam Long priorityId) {
+        return ResponseEntity.status(OK).body(taskService.updatePriority(id, priorityId));
+    }
+
+    @PatchMapping("/{id}/author")
+    public ResponseEntity<TaskResponseDto> updateAuthor(@PathVariable @Positive Long id, @RequestParam Long authorId) {
+        return ResponseEntity.status(OK).body(taskService.updateAuthor(id, authorId));
+    }
+
+    @PatchMapping("/{id}/assignee")
+    public ResponseEntity<TaskResponseDto> updateAssignee(@PathVariable @Positive Long id, @RequestParam Long assigneeId) {
+        return ResponseEntity.status(OK).body(taskService.updateAssignee(id, assigneeId));
     }
 
     @DeleteMapping("/{id}")

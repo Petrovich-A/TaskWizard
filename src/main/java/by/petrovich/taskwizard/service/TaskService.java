@@ -25,10 +25,11 @@ public interface TaskService {
 
     TaskResponseDto update(Long id, TaskRequestDto taskRequestDto) throws TaskNotFoundException;
 
-    TaskResponseDto updateTaskAuthor(Long taskId, Long userId) throws TaskNotFoundException, UserNotFoundException;
+    TaskResponseDto updateStatus(Long id, Long statusId) throws TaskNotFoundException, TaskStatusNotFoundException;
 
-    TaskResponseDto updateTaskStatus(Long taskId, Long statusId) throws TaskNotFoundException, TaskStatusNotFoundException;
+    TaskResponseDto updateAuthor(Long taskId, Long userId) throws TaskNotFoundException, UserNotFoundException;
 
-    TaskResponseDto updateTaskPriority(Long taskId, Long priorityId) throws TaskNotFoundException, TaskPriorityNotFoundException;
+    TaskResponseDto updatePriority(Long taskId, Long priorityId) throws TaskNotFoundException, TaskPriorityNotFoundException;
 
+    TaskResponseDto updateAssignee(Long id, Long userId) throws TaskNotFoundException, UserNotFoundException;
 }
