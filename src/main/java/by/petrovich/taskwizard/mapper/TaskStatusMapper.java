@@ -22,6 +22,10 @@ public interface TaskStatusMapper {
 
     @Mapping(target = "id", source = "id")
     @Named("mapStatus")
-    TaskStatus map(Long id);
+    TaskStatus mapStatus(Long id);
+
+    default String toName(TaskStatus taskStatus) {
+        return taskStatus != null ? taskStatus.getName() : null;
+    }
 
 }

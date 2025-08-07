@@ -22,6 +22,10 @@ public interface TaskPriorityMapper {
 
     @Mapping(target = "id", source = "id")
     @Named("mapPriority")
-    TaskPriority map(Long id);
+    TaskPriority mapPriority(Long id);
+
+    default String toName(TaskPriority taskPriority) {
+        return taskPriority != null ? taskPriority.getName() : null;
+    }
 
 }
