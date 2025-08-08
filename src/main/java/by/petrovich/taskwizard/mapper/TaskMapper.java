@@ -8,12 +8,14 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {TaskStatusMapper.class, TaskPriorityMapper.class, UserMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {TaskStatusMapper.class, TaskPriorityMapper.class,
+        UserMapper.class, TaskCommentMapper.class})
 public interface TaskMapper {
     @Mapping(target = "status", source = "taskStatus")
     @Mapping(target = "priority", source = "taskPriority")
     @Mapping(target = "author", source = "author", qualifiedByName = "toAuthorName")
     @Mapping(target = "assignee", source = "assignee", qualifiedByName = "toAssigneeName")
+    @Mapping(target = "comments", source = "taskComments")
     TaskResponseDto toResponseDto(Task task);
 
     @Mapping(target = "id", ignore = true)

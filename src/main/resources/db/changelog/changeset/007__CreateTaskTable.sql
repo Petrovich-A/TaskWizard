@@ -12,8 +12,8 @@ CREATE TABLE task
     PRIMARY KEY (id),
     CONSTRAINT fk_task_status FOREIGN KEY (status_id) REFERENCES task_status (id),
     CONSTRAINT fk_task_priority FOREIGN KEY (priority_id) REFERENCES task_priority (id),
-    CONSTRAINT fk_task_author FOREIGN KEY (author_id) REFERENCES users (id),
-    CONSTRAINT fk_task_assignee FOREIGN KEY (assignee_id) REFERENCES users (id)
+    CONSTRAINT fk_task_author FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_task_assignee FOREIGN KEY (assignee_id) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 

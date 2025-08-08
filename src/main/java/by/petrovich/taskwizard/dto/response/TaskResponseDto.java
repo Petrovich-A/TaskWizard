@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -25,4 +26,6 @@ public class TaskResponseDto {
     private String author;
 
     private String assignee;
+
+    private List<TaskCommentResponseDto> comments;
 }
