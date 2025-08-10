@@ -34,8 +34,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Page<TaskResponseDto> findAll(Pageable pageable) {
-        Page<Task> Tasks = taskRepository.findAll(pageable);
-        return Tasks.map(taskMapper::toResponseDto);
+        Page<Task> tasks = taskRepository.findAll(pageable);
+        return tasks.map(taskMapper::toResponseDto);
     }
 
     @Override
@@ -49,6 +49,24 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponseDto find(Long id) throws TaskNotFoundException {
         return taskMapper.toResponseDto(taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task with id " + id + " not found")));
+    }
+
+    @Override
+    public Page<TaskResponseDto> findByAuthor(Long authorId, Pageable pageable) throws TaskNotFoundException {
+        Page<Task> tasksByAuthor = taskRepository.findByAuthor_Id(authorId, pageable);
+        if (tasksByAuthor.isEmpty()) {
+            throw new TaskNotFoundException("Tasks for author with id " + authorId + " not found");
+        }
+        return tasksByAuthor.map(taskMapper::toResponseDto);
+    }
+
+    @Override
+    public Page<TaskResponseDto> findByAssignee(Long assigneeId, Pageable pageable) throws TaskNotFoundException {
+        Page<Task> tasksByAuthor = taskRepository.findByAssignee_Id(assigneeId, pageable);
+        if (tasksByAuthor.isEmpty()) {
+            throw new TaskNotFoundException("Tasks for assignee with id " + assigneeId + " not found");
+        }
+        return tasksByAuthor.map(taskMapper::toResponseDto);
     }
 
     @Override

@@ -19,6 +19,10 @@ public interface TaskService {
 
     TaskResponseDto find(Long id) throws TaskNotFoundException;
 
+    Page<TaskResponseDto> findByAuthor(Long authorId, Pageable pageable) throws TaskNotFoundException;
+
+    Page<TaskResponseDto> findByAssignee(Long assigneeId, Pageable pageable) throws TaskNotFoundException;
+
     TaskResponseDto create(TaskRequestDto TaskRequestDto);
 
     void delete(Long id) throws TaskNotFoundException;

@@ -39,7 +39,7 @@ public class TaskController {
 
     @GetMapping("/tasks")
     public ResponseEntity<Page<TaskResponseDto>> findAll(@RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
-                                                         @RequestParam(name = "size", defaultValue = "1") @Min(0) int size) {
+                                                         @RequestParam(name = "size", defaultValue = "3") @Min(0) int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(OK).body(taskService.findAll(pageable));
     }
@@ -56,6 +56,22 @@ public class TaskController {
     public ResponseEntity<TaskResponseDto> find(@PathVariable @Positive Long id) {
         TaskResponseDto TaskResponseDto = taskService.find(id);
         return ResponseEntity.status(OK).body(TaskResponseDto);
+    }
+
+    @GetMapping("/author/{authorId}")
+    public ResponseEntity<Page<TaskResponseDto>> findByAuthor(@PathVariable @Positive Long authorId,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "3") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.status(OK).body(taskService.findByAuthor(authorId, pageable));
+    }
+
+    @GetMapping("/assignee/{assigneeId}")
+    public ResponseEntity<Page<TaskResponseDto>> findByAssignee(@PathVariable @Positive Long assigneeId,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "3") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.status(OK).body(taskService.findByAssignee(assigneeId, pageable));
     }
 
     @PostMapping("/")
