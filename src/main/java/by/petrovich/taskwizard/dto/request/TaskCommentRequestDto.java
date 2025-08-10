@@ -5,10 +5,10 @@ import lombok.Data;
 
 @Data
 @Builder
-public class TaskPriorityRequestDto {
+public class TaskCommentRequestDto {
     private Long id;
 
-    private String name;
+    private String comment;
 
     private Long taskId;
 

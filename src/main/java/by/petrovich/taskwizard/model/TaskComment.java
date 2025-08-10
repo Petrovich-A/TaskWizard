@@ -42,4 +42,9 @@ public class TaskComment {
     @JoinColumn(name = "task_id", nullable = false, foreignKey = @ForeignKey(name = "fk_task_comment_task"))
     private Task task;
 
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_task_comment_user"))
+    private User author;
+
 }

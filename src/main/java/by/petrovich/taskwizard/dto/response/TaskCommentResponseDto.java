@@ -14,4 +14,8 @@ public class TaskCommentResponseDto {
 
     private LocalDateTime createdAt;
 
+    private String author;
+
+    private Long taskId;
+
 }
