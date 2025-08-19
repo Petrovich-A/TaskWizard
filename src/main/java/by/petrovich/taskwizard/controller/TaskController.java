@@ -5,6 +5,7 @@ import by.petrovich.taskwizard.dto.response.TaskResponseDto;
 import by.petrovich.taskwizard.service.impl.TaskServiceImpl;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,7 +37,6 @@ import static org.springframework.http.HttpStatus.OK;
 @RequestMapping("/api/v1/task")
 @EnableMethodSecurity
 @RequiredArgsConstructor
-@Validated
 public class TaskController {
     private final TaskServiceImpl taskService;
 
@@ -50,7 +50,8 @@ public class TaskController {
 
     @GetMapping("/sort")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<TaskResponseDto>> findAll(@RequestParam(defaultValue = "ASC") String sortDirection,
+    public ResponseEntity<List<TaskResponseDto>> findAll(@RequestParam(defaultValue = "ASC")
+                                                         @Pattern(regexp = "^(ASC|DESC)$", message = "Sort direction must be ASC or DESC") String sortDirection,
                                                          @RequestParam(defaultValue = "id") String sortBy) {
         Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);

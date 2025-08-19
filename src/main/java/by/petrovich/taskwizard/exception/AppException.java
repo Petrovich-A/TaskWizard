@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public class AppException extends RuntimeException {
-    private final ErrorType error;
+    private final ErrorType errorType;
     private final Object[] params;
 
-    public AppException(ErrorType error, Object... params) {
-        super(String.format(error.getDescription(), params));
-        this.error = error;
+    public AppException(ErrorType errorType, Object... params) {
+        super(String.format(errorType.getDescription(), params));
+        this.errorType = errorType;
         this.params = params;
     }
 

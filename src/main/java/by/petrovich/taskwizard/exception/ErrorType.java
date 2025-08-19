@@ -15,6 +15,9 @@ public enum ErrorType {
     ENTITY_DELETION_FORBIDDEN("Deletion of %s is forbidden."),
     ASSIGNEE_NOT_FOUND("The task does not have an assigned user."),
     TASK_MODIFICATION_FORBIDDEN("You do not have permission to modify this task."),
+    INVALID_INPUT("The provided data is invalid and does not meet the required criteria."),
+    INVALID_TOKEN("The provided token is invalid."),
+    MISSING_JWT_TOKEN("No token was provided in the request."),
     UNAUTHORIZED("Access is denied. Authorization is required.");
 
     private final String description;

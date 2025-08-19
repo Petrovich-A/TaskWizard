@@ -6,8 +6,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -32,7 +38,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAppException(AppException e, HttpServletRequest request) {
         logger.error("AppException occurred: {}", e.getMessage(), e);
 
-        ErrorType errorType = e.getError();
+        ErrorType errorType = e.getErrorType();
 
         HttpStatus status = switch (errorType) {
             case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
@@ -41,6 +47,8 @@ public class GlobalExceptionHandler {
             case ENTITY_CREATION_FAILED, ENTITY_UPDATE_FAILED, ENTITY_DELETION_FAILED -> HttpStatus.BAD_REQUEST;
             case ENTITY_DELETION_FORBIDDEN -> HttpStatus.FORBIDDEN;
             case TASK_MODIFICATION_FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case INVALID_TOKEN -> HttpStatus.UNAUTHORIZED;
+            case MISSING_JWT_TOKEN -> HttpStatus.BAD_REQUEST;
             case ASSIGNEE_NOT_FOUND -> HttpStatus.NOT_FOUND;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
@@ -54,6 +62,33 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
 
         return ResponseEntity.status(status)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e, HttpServletRequest request) {
+        logger.error("MethodArgumentNotValidException occurred: {}", e.getMessage(), e);
+
+        Map<String, List<String>> errors = e.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.groupingBy(FieldError::getField,
+                        Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())));
+
+        String message = errors.entrySet().stream()
+                .map(entry -> String.format("Field: '%s'\nMessages: '%s'",
+                        entry.getKey(),
+                        String.join(", ", entry.getValue())))
+                .collect(Collectors.joining("\n\n"));
+
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+
+        ErrorResponse errorResponse = ErrorResponse.build(
+                ErrorType.INVALID_INPUT.name(),
+                httpStatus.value(),
+                message,
+                request.getRequestURI());
+
+        return ResponseEntity.status(httpStatus)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(errorResponse);
     }

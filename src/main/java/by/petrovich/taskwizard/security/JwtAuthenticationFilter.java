@@ -1,5 +1,7 @@
 package by.petrovich.taskwizard.security;
 
+import by.petrovich.taskwizard.exception.AppException;
+import by.petrovich.taskwizard.exception.ErrorType;
 import by.petrovich.taskwizard.exception.GlobalExceptionHandler;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -32,33 +33,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = getTokenFromRequest(request);
-        logger.debug("Token: {}", token);
 
-        if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
-            String email = jwtTokenProvider.getUsername(token);
-            logger.debug("Authenticated email: {}", email);
+        if (!StringUtils.hasText(token)) {
+            logger.warn("Token not present in request.");
+            throw new AppException(ErrorType.MISSING_JWT_TOKEN, JwtAuthenticationFilter.class.getSimpleName());
+        }
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-            if (userDetails != null) {
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
+        if (!jwtTokenProvider.validateToken(token)) {
+            logger.warn("Invalid token provided.");
+            throw new AppException(ErrorType.INVALID_TOKEN, JwtAuthenticationFilter.class.getSimpleName());
+        }
 
-                logger.debug("User roles: ");
-                for (GrantedAuthority authority : userDetails.getAuthorities()) {
-                    logger.debug(" - " + authority.getAuthority());
-                }
+        String email = jwtTokenProvider.getUsername(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                logger.debug("User authenticated: {}", userDetails.getUsername());
-            } else {
-                logger.debug("User Details not found for email: {}", email);
-            }
-        } else {
-            logger.debug("Invalid token or token not present");
+        if (userDetails != null) {
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+            );
+
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            logger.info("User authenticated: {}", userDetails.getUsername());
         }
         filterChain.doFilter(request, response);
     }
