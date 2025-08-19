@@ -35,10 +35,13 @@ public class GlobalExceptionHandler {
         ErrorType errorType = e.getError();
 
         HttpStatus status = switch (errorType) {
+            case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
             case ENTITY_NOT_FOUND -> HttpStatus.NOT_FOUND;
             case ENTITY_ALREADY_EXISTS, DATA_INTEGRITY_VIOLATION -> HttpStatus.CONFLICT;
             case ENTITY_CREATION_FAILED, ENTITY_UPDATE_FAILED, ENTITY_DELETION_FAILED -> HttpStatus.BAD_REQUEST;
             case ENTITY_DELETION_FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case TASK_MODIFICATION_FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case ASSIGNEE_NOT_FOUND -> HttpStatus.NOT_FOUND;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
 

@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     public List<UserResponseDto> findAll(Sort sort) {
         List<User> users = userRepository.findAll(sort);
         return users.stream()
-                .map(userMapper::toResponseDto)
+                .map(userMapper::toRequestDto)
                 .collect(Collectors.toList());
     }
 
@@ -41,14 +41,14 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto find(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorType.ENTITY_NOT_FOUND, User.class.getSimpleName()));
-        return userMapper.toResponseDto(user);
+        return userMapper.toRequestDto(user);
     }
 
     @Override
     public UserResponseDto find(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorType.ENTITY_NOT_FOUND, User.class.getSimpleName()));
-        return userMapper.toResponseDto(user);
+        return userMapper.toRequestDto(user);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
             User user = userMapper.toEntity(userRequestDto);
             User saved = userRepository.saveAndFlush(user);
             entityManager.refresh(saved);
-            return userMapper.toResponseDto(saved);
+            return userMapper.toRequestDto(saved);
         } catch (DataIntegrityViolationException e) {
             throw new AppException(DATA_INTEGRITY_VIOLATION, User.class.getSimpleName());
         }
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
         User updatedUser = userMapper.toEntityUpdate(userRequestDto, existingUser);
         User saved = userRepository.save(updatedUser);
-        return userMapper.toResponseDto(saved);
+        return userMapper.toRequestDto(saved);
     }
 
     @Override

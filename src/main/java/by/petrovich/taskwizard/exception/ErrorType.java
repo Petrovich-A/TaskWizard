@@ -12,7 +12,10 @@ public enum ErrorType {
     ENTITY_CREATION_FAILED("Failed to create %s."),
     ENTITY_UPDATE_FAILED("Failed to update %s."),
     ENTITY_DELETION_FAILED("Failed to delete %s."),
-    ENTITY_DELETION_FORBIDDEN("Deletion of %s is forbidden.");
+    ENTITY_DELETION_FORBIDDEN("Deletion of %s is forbidden."),
+    ASSIGNEE_NOT_FOUND("The task does not have an assigned user."),
+    TASK_MODIFICATION_FORBIDDEN("You do not have permission to modify this task."),
+    UNAUTHORIZED("Access is denied. Authorization is required.");
 
     private final String description;
 

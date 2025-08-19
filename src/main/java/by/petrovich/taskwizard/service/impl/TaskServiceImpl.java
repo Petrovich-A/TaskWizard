@@ -3,6 +3,7 @@ package by.petrovich.taskwizard.service.impl;
 import by.petrovich.taskwizard.dto.request.TaskRequestDto;
 import by.petrovich.taskwizard.dto.response.TaskResponseDto;
 import by.petrovich.taskwizard.exception.AppException;
+import by.petrovich.taskwizard.exception.ErrorType;
 import by.petrovich.taskwizard.mapper.TaskMapper;
 import by.petrovich.taskwizard.model.Task;
 import by.petrovich.taskwizard.model.TaskPriority;
@@ -17,6 +18,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,7 @@ import static by.petrovich.taskwizard.exception.ErrorType.ENTITY_NOT_FOUND_ON_UP
 
 @Service
 @RequiredArgsConstructor
+@EnableMethodSecurity
 @Transactional(readOnly = true)
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
@@ -101,6 +105,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @PreAuthorize("@taskServiceImpl.isAssignee(#id, authentication.principal.id)")
     public TaskResponseDto updateStatus(Long id, Long statusId) {
         try {
             Task task = getTaskOrThrow(id);
@@ -179,6 +184,18 @@ public class TaskServiceImpl implements TaskService {
         } catch (DataIntegrityViolationException e) {
             throw new AppException(DATA_INTEGRITY_VIOLATION, Task.class.getSimpleName());
         }
+    }
+
+    public boolean isAssignee(Long taskId, Long userId) {
+        Task task = getTaskOrThrow(taskId);
+        if (task.getAssignee() == null || task.getAssignee().getId() == null) {
+            throw new AppException(ErrorType.ASSIGNEE_NOT_FOUND);
+        }
+        if (!task.getAssignee().getId().equals(userId)) {
+            throw new AppException(ErrorType.TASK_MODIFICATION_FORBIDDEN);
+        }
+
+        return true;
     }
 
     private Task getTaskOrThrow(Long id) {
