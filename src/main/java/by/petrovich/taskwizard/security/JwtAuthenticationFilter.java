@@ -1,7 +1,5 @@
 package by.petrovich.taskwizard.security;
 
-import by.petrovich.taskwizard.exception.AppException;
-import by.petrovich.taskwizard.exception.ErrorType;
 import by.petrovich.taskwizard.exception.GlobalExceptionHandler;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,20 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = getTokenFromRequest(request);
 
-        if (!StringUtils.hasText(token)) {
-            logger.warn("Token not present in request.");
-            throw new AppException(ErrorType.MISSING_JWT_TOKEN, JwtAuthenticationFilter.class.getSimpleName());
-        }
+        if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
+            String username = jwtTokenProvider.getUsername(token);
 
-        if (!jwtTokenProvider.validateToken(token)) {
-            logger.warn("Invalid token provided.");
-            throw new AppException(ErrorType.INVALID_TOKEN, JwtAuthenticationFilter.class.getSimpleName());
-        }
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        String email = jwtTokenProvider.getUsername(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-        if (userDetails != null) {
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     null,
@@ -55,9 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
 
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            logger.info("User authenticated: {}", userDetails.getUsername());
         }
+
         filterChain.doFilter(request, response);
     }
 

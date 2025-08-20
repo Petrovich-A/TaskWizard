@@ -18,6 +18,7 @@ public enum ErrorType {
     INVALID_INPUT("The provided data is invalid and does not meet the required criteria."),
     INVALID_TOKEN("The provided token is invalid."),
     MISSING_JWT_TOKEN("No token was provided in the request."),
+    USER_NOT_FOUND_DURING_AUTHENTICATION("Authentication failed: User not found with email: %s."),
     UNAUTHORIZED("Access is denied. Authorization is required.");
 
     private final String description;
