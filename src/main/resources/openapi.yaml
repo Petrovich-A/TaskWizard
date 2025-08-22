@@ -1,0 +1,272 @@
+openapi: 3.0.3
+info:
+  title: Task Management System API
+  description: |-
+    This is a Task Management System API built with Java and Spring.
+    The system provides functionality for creating, editing, deleting, and viewing tasks with authentication and authorization via JWT tokens.
+    
+    Features:
+    - User authentication and authorization
+    - Role-based access control (Admin and User roles)
+    - Task management with status tracking, priorities, and comments
+    - Filtering and pagination for task retrieval
+    - Comprehensive error handling and input validation
+    
+    Roles:
+    - Admin: Full access to all tasks and user management
+    - User: Access to own tasks and tasks where assigned as executor
+    
+    Authentication: All endpoints (except login/register) require JWT token in Authorization header.
+  version: 1.0.0
+  contact:
+    email: support@taskmanagement.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+externalDocs:
+  description: API Documentation
+  url: https://github.com/Petrovich-A/TaskWizard
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://api.taskmanagement.com/v1
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and registration
+
+paths:
+  /auth/sign-up:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create a new user account
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+            examples:
+              validRegistration:
+                summary: Valid user registration
+                value:
+                  userName: "john_doe"
+                  email: "john.doe@example.com"
+                  password: "securePassword123"
+              invalidEmail:
+                summary: Invalid email format
+                value:
+                  userName: "test_user"
+                  email: "invalid-email"
+                  password: "password123"
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/sign-in:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT token
+      operationId: signIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+            examples:
+              validLogin:
+                summary: Valid user credentials
+                value:
+                  email: "john.doe@example.com"
+                  password: "securePassword123"
+              invalidCredentials:
+                summary: Invalid password
+                value:
+                  email: "john.doe@example.com"
+                  password: "wrongpassword"
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtAuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    SignUpRequest:
+      type: object
+      required:
+        - userName
+        - email
+        - password
+      properties:
+        userName:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: "john_doe"
+          description: User's username (3-30 characters)
+        email:
+          type: string
+          format: email
+          maxLength: 50
+          example: "john.doe@example.com"
+          description: User's email address
+        password:
+          type: string
+          minLength: 8
+          maxLength: 255
+          example: "securePassword123"
+          description: User's password (8-255 characters)
+
+    SignInRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+          description: User's registered email
+        password:
+          type: string
+          minLength: 8
+          example: "securePassword123"
+          description: User's password
+
+    JwtAuthResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          example: 1
+          description: User ID
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          description: JWT access token for authentication
+        email:
+          type: string
+          example: "john.doe@example.com"
+          description: User's email
+        name:
+          type: string
+          example: "john_doe"
+          description: User's name
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [ROLE_ADMIN, ROLE_USER]
+          example: ["ROLE_USER"]
+          description: User roles
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: User ID
+        email:
+          type: string
+          example: "john.doe@example.com"
+          description: User's email
+        name:
+          type: string
+          example: "john_doe"
+          description: User's name
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15 10:30:00"
+          description: User creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15 10:30:00"
+          description: Last update timestamp
+        authoredTaskIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          example: []
+          description: IDs of tasks created by this user
+        assignedTaskIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          example: []
+          description: IDs of tasks assigned to this user
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [ROLE_ADMIN, ROLE_USER]
+          example: ["ROLE_USER"]
+          description: User roles
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Validation failed"
+        errors:
+          type: array
+          items:
+            type: string
+          example: ["Password must be at least 8 characters long"]
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

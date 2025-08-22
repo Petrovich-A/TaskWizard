@@ -34,6 +34,12 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authorize) -> {
                     authorize.requestMatchers("/api/v1/auth/**").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,
+                            "/swagger-ui/**",
+                            "/webjars/**",
+                            "/openapi.yaml",
+                            "/v3/api-docs/**")
+                            .permitAll();
                     authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
                     authorize.anyRequest().authenticated();
                 }).httpBasic(Customizer.withDefaults());
@@ -41,7 +47,7 @@ public class SecurityConfig {
         http.exceptionHandling(exception -> exception
                 .authenticationEntryPoint(authenticationEntryPoint));
 
-        http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
