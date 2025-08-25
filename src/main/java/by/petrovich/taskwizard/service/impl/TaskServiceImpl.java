@@ -123,6 +123,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @PreAuthorize("@taskServiceImpl.isAssignee(#id, authentication.principal.id)")
     public TaskResponseDto updatePriority(Long id, Long priorityId) {
         try {
             Task task = getTaskOrThrow(id);

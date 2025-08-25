@@ -542,9 +542,9 @@ paths:
         - Tasks
       summary: Update task status
       description: |
-       Update the status of a task. Accessible by USER and ADMIN roles.
-       - Users can update status only for their own tasks (where they are assigned as executor)
-       - Admins can update status for any task
+       Update the status of a task status. Accessible by USER and ADMIN roles.
+       - Users can update task status only for their own tasks (where they are assigned as executor)
+       - Admins can update task status for any task
       security:
         - bearerAuth: [ ]
       parameters:
@@ -583,7 +583,10 @@ paths:
       tags:
         - Tasks
       summary: Update task priority
-      description: Update the priority of a task. Accessible by USER and ADMIN roles.
+      description: |
+        Update the status of a task. Accessible by USER and ADMIN roles.
+        - Users can update task priority only for their own tasks (where they are assigned as executor)
+        - Admins can update task priority for any task
       security:
         - bearerAuth: [ ]
       parameters:
@@ -594,6 +597,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
+          example: 1
         - name: priorityId
           in: query
           required: true
@@ -601,6 +605,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
+          example: 3
       responses:
         '200':
           description: Priority updated successfully

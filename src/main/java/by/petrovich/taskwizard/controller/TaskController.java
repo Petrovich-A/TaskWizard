@@ -103,6 +103,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}/priority")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<TaskResponseDto> updatePriority(@PathVariable @Positive Long id, @RequestParam Long priorityId) {
         return ResponseEntity.status(OK).body(taskService.updatePriority(id, priorityId));
     }
