@@ -26,10 +26,11 @@ public class GlobalExceptionHandler {
         ErrorType errorType = e.getErrorType();
 
         HttpStatus status = switch (errorType) {
-            case UNAUTHORIZED, INVALID_TOKEN, USER_NOT_FOUND_DURING_AUTHENTICATION -> HttpStatus.UNAUTHORIZED;
+            case USER_NOT_FOUND_DURING_AUTHENTICATION -> HttpStatus.UNAUTHORIZED;
             case ENTITY_NOT_FOUND, ASSIGNEE_NOT_FOUND -> HttpStatus.NOT_FOUND;
             case ENTITY_ALREADY_EXISTS, DATA_INTEGRITY_VIOLATION -> HttpStatus.CONFLICT;
-            case ENTITY_CREATION_FAILED, ENTITY_UPDATE_FAILED, ENTITY_DELETION_FAILED, MISSING_JWT_TOKEN -> HttpStatus.BAD_REQUEST;
+            case ENTITY_CREATION_FAILED, ENTITY_UPDATE_FAILED, ENTITY_DELETION_FAILED ->
+                    HttpStatus.BAD_REQUEST;
             case ENTITY_DELETION_FORBIDDEN, TASK_MODIFICATION_FORBIDDEN -> HttpStatus.FORBIDDEN;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
@@ -78,15 +79,28 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
         logger.error(ErrorType.DEFAULT.getDescription(), e);
 
+        AppException cause = findCause(e, AppException.class);
+
+        if (cause != null) {
+            return handleAppException(cause, request);
+        }
         ErrorResponse errorResponse = ErrorResponse.build(
-                ErrorType.DEFAULT.name(),
+                e.getClass().getSimpleName(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                ErrorType.DEFAULT.getDescription(),
+                e.getMessage(),
                 request.getRequestURI());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(errorResponse);
+    }
+
+    private static <T extends Throwable> T findCause(Throwable t, Class<T> type) {
+        while (t != null && t.getCause() != t) {
+            if (type.isInstance(t)) return type.cast(t);
+            t = t.getCause();
+        }
+        return null;
     }
 
 }

@@ -2,7 +2,6 @@ package by.petrovich.taskwizard.security;
 
 import by.petrovich.taskwizard.exception.AppException;
 import by.petrovich.taskwizard.exception.ErrorType;
-import by.petrovich.taskwizard.exception.GlobalExceptionHandler;
 import by.petrovich.taskwizard.model.User;
 import by.petrovich.taskwizard.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +20,13 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
     private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email).orElseThrow(() -> {
-            logger.error(ErrorType.USER_NOT_FOUND_DURING_AUTHENTICATION.getDescription());
+            logger.debug(ErrorType.USER_NOT_FOUND_DURING_AUTHENTICATION.getDescription());
             throw new AppException(ErrorType.USER_NOT_FOUND_DURING_AUTHENTICATION, email);
         });
         Set<GrantedAuthority> authorities = user.getRoles().stream()

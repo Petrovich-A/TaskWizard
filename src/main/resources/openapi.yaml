@@ -38,7 +38,7 @@ paths:
   /auth/sign-up:
     post:
       tags:
-        - Authentication
+        - Registration
       summary: Register new user
       description: Create a new user account
       operationId: signUp
@@ -48,19 +48,65 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SignUpRequest'
+
             examples:
-              validRegistration:
+              # valid
+              validUser1:
                 summary: Valid user registration
                 value:
                   userName: "john_doe"
                   email: "john.doe@example.com"
                   password: "securePassword123"
-              invalidEmail:
-                summary: Invalid email format
+
+              validUser2:
+                summary: Another valid user registration
                 value:
-                  userName: "test_user"
-                  email: "invalid-email"
-                  password: "password123"
+                  userName: "frank_example"
+                  email: "frank@example.com"
+                  password: "Fr@nk2025*Pwd!"
+
+              # invalid
+              invalidUserNameTooShort:
+                summary: User name too short
+                value:
+                  userName: "jd"
+                  email: "user@example.com"
+                  password: "validPassword123"
+
+              invalidEmailFormat:
+                summary: Malformed email address
+                value:
+                  userName: "john_doe"
+                  email: "not-an-email"
+                  password: "securePassword123"
+
+              missingPassword:
+                summary: Password field missing
+                value:
+                  userName: "jane_doe"
+                  email: "jane@example.com"
+
+              passwordTooWeak:
+                summary: Password does not meet strength requirements
+                value:
+                  userName: "weak_password_user"
+                  email: "weak@example.com"
+                  password: "123"
+
+              duplicateEmail:
+                summary: Email already in use
+                value:
+                  userName: "duplicate_user"
+                  email: "carol@example.com"
+                  password: "securePassword123"
+
+              emptyFields:
+                summary: All fields are empty
+                value:
+                  userName: ""
+                  email: ""
+                  password: ""
+
       responses:
         '201':
           description: User created successfully
@@ -95,16 +141,84 @@ paths:
             schema:
               $ref: '#/components/schemas/SignInRequest'
             examples:
-              validLogin:
-                summary: Valid user credentials
+              # valid
+              admin1:
+                summary: Admin user login 1
+                value:
+                  email: "alice@example.com"
+                  password: "A1!s#9xPqZwef)l;jkwef19087"
+
+              regularUser6:
+                summary: Regular user Bob 6
+                value:
+                  email: "bob@example.com"
+                  password: "B0b$Tr0ngP@ss"
+
+              regularUser11:
+                summary: Regular user Carol 11
+                value:
+                  email: "carol@example.com"
+                  password: "C@r0l#2025!"
+
+              regularUser16:
+                summary: Regular user Dave 16
+                value:
+                  email: "dave@example.com"
+                  password: "D4v3*Secure*Pwd"
+
+              regularUser21:
+                summary: Regular user Eve 21
+                value:
+                  email: "eve@example.com"
+                  password: "Ev3!P@ssw0rd#"
+
+              regularUser2:
+                summary: Regular user Frank
+                value:
+                  email: "frank@example.com"
+                  password: "Fr@nk2025*Pwd!"
+
+              regularUser3:
+                summary: Regular user John
                 value:
                   email: "john.doe@example.com"
                   password: "securePassword123"
-              invalidCredentials:
-                summary: Invalid password
+
+              # invalid
+              invalidPassword:
+                summary: Wrong password
                 value:
                   email: "john.doe@example.com"
-                  password: "wrongpassword"
+                  password: "wrongpassword123"
+
+              userNotFound:
+                summary: Non-existent user
+                value:
+                  email: "nonexistent@example.com"
+                  password: "anypassword123"
+
+              emptyCredentials:
+                summary: Empty email and password
+                value:
+                  email: ""
+                  password: ""
+
+              invalidEmailFormat:
+                summary: Malformed email address
+                value:
+                  email: "not-an-email"
+                  password: "somepassword123"
+
+              missingPassword:
+                summary: Password field missing
+                value:
+                  email: "john.doe@example.com"
+
+              missingEmail:
+                summary: Email field missing
+                value:
+                  password: "securePassword123"
+
       responses:
         '200':
           description: Successful authentication
@@ -124,6 +238,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+#tasks
 
   /task/tasks:
     get:
@@ -425,7 +541,10 @@ paths:
       tags:
         - Tasks
       summary: Update task status
-      description: Update the status of a task. Accessible by USER and ADMIN roles.
+      description: |
+       Update the status of a task. Accessible by USER and ADMIN roles.
+       - Users can update status only for their own tasks (where they are assigned as executor)
+       - Admins can update status for any task
       security:
         - bearerAuth: [ ]
       parameters:
@@ -436,6 +555,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
+          example: 11
         - name: statusId
           in: query
           required: true
@@ -443,6 +563,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
+          example: 1
       responses:
         '200':
           description: Status updated successfully
@@ -567,6 +688,8 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden
+
+# comments
 
   /comment/comments:
     get:
@@ -1685,6 +1808,8 @@ security:
   - bearerAuth: [ ]
 
 tags:
+  - name: Registration
+    description: User registration
   - name: Authentication
     description: User authentication, registration and token management
   - name: Tasks

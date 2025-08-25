@@ -4,6 +4,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
     private final String jwtSecretKey;
 
     public JwtTokenProvider(@Value("${jwt.secret.key}") String jwtSecretKey) {
@@ -50,12 +53,16 @@ public class JwtTokenProvider {
     }
 
     public boolean validateToken(String token) {
-        Jwts.parser()
-                .verifyWith((SecretKey) key())
-                .build()
-                .parse(token);
-        return true;
-
+        try {
+            Jwts.parser()
+                    .verifyWith((SecretKey) key())
+                    .build()
+                    .parse(token);
+            return true;
+        } catch (Exception e) {
+            logger.debug("JWT token is invalid");
+            return false;
+        }
     }
 
     private Key key() {
