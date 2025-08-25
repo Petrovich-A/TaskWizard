@@ -34,10 +34,6 @@ servers:
   - url: https://api.taskmanagement.com/v1
     description: Production server
 
-tags:
-  - name: Authentication
-    description: User authentication and registration
-
 paths:
   /auth/sign-up:
     post:
@@ -129,6 +125,1026 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /task/tasks:
+    get:
+      tags:
+        - Tasks
+      summary: Get paginated list of tasks
+      description: Retrieve all tasks with pagination. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: page
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            default: 3
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageTaskResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /task/sort:
+    get:
+      tags:
+        - Tasks
+      summary: Get sorted list of tasks
+      description: Retrieve all tasks sorted by specified field and direction. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            enum: [ ASC, DESC ]
+            default: ASC
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+            default: id
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid sort direction
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /task/{id}:
+    get:
+      tags:
+        - Tasks
+      summary: Get task by ID
+      description: Retrieve a specific task by its ID. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /task/author/{authorId}:
+    get:
+      tags:
+        - Tasks
+      summary: Get tasks by author
+      description: Retrieve tasks created by a specific author with pagination. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: authorId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            default: 3
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageTaskResponse'
+        '404':
+          description: Author not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /task/assignee/{assigneeId}:
+    get:
+      tags:
+        - Tasks
+      summary: Get tasks by assignee
+      description: Retrieve tasks assigned to a specific user with pagination. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: assigneeId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          description: Page number (0-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            default: 3
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageTaskResponse'
+        '404':
+          description: Assignee not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /task/:
+    post:
+      tags:
+        - Tasks
+      summary: Create new task
+      description: Create a new task. Accessible only by ADMIN role.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid input data
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+    put:
+      tags:
+        - Tasks
+      summary: Update task
+      description: Update an existing task. Accessible only by ADMIN role.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Invalid input data
+        '404':
+          description: Task not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+    delete:
+      tags:
+        - Tasks
+      summary: Delete task
+      description: Delete a task. Accessible only by ADMIN role.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '204':
+          description: Task deleted successfully
+        '404':
+          description: Task not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /task/{id}/status:
+    patch:
+      tags:
+        - Tasks
+      summary: Update task status
+      description: Update the status of a task. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: statusId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task or status not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /task/{id}/priority:
+    patch:
+      tags:
+        - Tasks
+      summary: Update task priority
+      description: Update the priority of a task. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: priorityId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Priority updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task or priority not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /task/{id}/author:
+    patch:
+      tags:
+        - Tasks
+      summary: Update task author
+      description: Update the author of a task. Accessible only by ADMIN role.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: authorId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Author updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task or author not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /task/{id}/assignee:
+    patch:
+      tags:
+        - Tasks
+      summary: Update task assignee
+      description: Update the assignee of a task. Accessible only by ADMIN role.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: assigneeId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Assignee updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          description: Task or assignee not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /comment/comments:
+    get:
+      tags:
+        - Comments
+      summary: Get all comments
+      description: Retrieve all comments with sorting options. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            enum: [ ASC, DESC ]
+            default: ASC
+        - name: sortBy
+          in: query
+          description: Field to sort by (id, createdAt, etc.)
+          required: false
+          schema:
+            type: string
+            default: id
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskCommentResponseDto'
+        '400':
+          description: Invalid sort parameters
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /comment/{id}:
+    get:
+      tags:
+        - Comments
+      summary: Get comment by ID
+      description: Retrieve a specific comment by its ID. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskCommentResponseDto'
+        '404':
+          description: Comment not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+    delete:
+      tags:
+        - Comments
+      summary: Delete comment
+      description: Delete a comment. Accessible by USER and ADMIN roles (users can only delete their own comments).
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Comment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Comment deleted"
+        '404':
+          description: Comment not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /comment:
+    post:
+      tags:
+        - Comments
+      summary: Create new comment
+      description: Create a new comment for a task. Accessible by USER and ADMIN roles.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCommentRequestDto'
+            examples:
+              validComment:
+                summary: Valid comment creation
+                value:
+                  comment: "This task is progressing well"
+                  taskId: 1
+                  authorId: 2
+              invalidComment:
+                summary: Comment too long
+                value:
+                  comment: "This is a very long comment that exceeds the maximum allowed length of 200 characters and therefore should trigger a validation error when submitted to the server for processing"
+                  taskId: 1
+                  authorId: 2
+      responses:
+        '201':
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskCommentResponseDto'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Task or author not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+
+  /priority/priorities:
+    get:
+      tags:
+        - Task Priorities
+      summary: Get all task priorities
+      description: Retrieve all task priorities with sorting options
+      parameters:
+        - name: sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            enum: [ ASC, DESC ]
+            default: ASC
+        - name: sortBy
+          in: query
+          description: Field to sort by (id, name)
+          required: false
+          schema:
+            type: string
+            default: id
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskPriorityResponseDto'
+        '400':
+          description: Invalid sort parameters
+
+  /priority/{id}:
+    get:
+      tags:
+        - Task Priorities
+      summary: Get task priority by ID
+      description: Retrieve a specific task priority by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskPriorityResponseDto'
+        '404':
+          description: Task priority not found
+    put:
+      tags:
+        - Task Priorities
+      summary: Update task priority
+      description: Update an existing task priority
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskPriorityRequestDto'
+      responses:
+        '200':
+          description: Task priority updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskPriorityResponseDto'
+        '400':
+          description: Invalid input data
+        '404':
+          description: Task priority not found
+    delete:
+      tags:
+        - Task Priorities
+      summary: Delete task priority
+      description: Delete a task priority
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Task priority deleted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Task priority deleted"
+        '404':
+          description: Task priority not found
+
+  /priority:
+    post:
+      tags:
+        - Task Priorities
+      summary: Create new task priority
+      description: Create a new task priority
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskPriorityRequestDto'
+      responses:
+        '201':
+          description: Task priority created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskPriorityResponseDto'
+        '400':
+          description: Invalid input data
+
+
+  /status/statuses:
+    get:
+      tags:
+        - Task Statuses
+      summary: Get all task statuses
+      description: Retrieve all task statuses with sorting options
+      parameters:
+        - name: sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            enum: [ ASC, DESC ]
+            default: ASC
+        - name: sortBy
+          in: query
+          description: Field to sort by (id, name, updatedAt)
+          required: false
+          schema:
+            type: string
+            default: id
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskStatusResponseDto'
+        '400':
+          description: Invalid sort parameters
+
+  /status/{id}:
+    get:
+      tags:
+        - Task Statuses
+      summary: Get task status by ID
+      description: Retrieve a specific task status by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatusResponseDto'
+        '404':
+          description: Task status not found
+    put:
+      tags:
+        - Task Statuses
+      summary: Update task status
+      description: Update an existing task status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskStatusRequestDto'
+      responses:
+        '200':
+          description: Task status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatusResponseDto'
+        '400':
+          description: Invalid input data
+        '404':
+          description: Task status not found
+    delete:
+      tags:
+        - Task Statuses
+      summary: Delete task status
+      description: Delete a task status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Task status deleted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Task status deleted"
+        '404':
+          description: Task status not found
+
+  /status:
+    post:
+      tags:
+        - Task Statuses
+      summary: Create new task status
+      description: Create a new task status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskStatusRequestDto'
+      responses:
+        '201':
+          description: Task status created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatusResponseDto'
+        '400':
+          description: Invalid input data
+
+
+# users
+
+  /user/users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: Retrieve all users with sorting options
+      parameters:
+        - name: sortDirection
+          in: query
+          description: Sort direction (ASC or DESC)
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: ASC
+        - name: sortBy
+          in: query
+          description: Field to sort by (id, email, name, createdAt, updatedAt)
+          required: false
+          schema:
+            type: string
+            default: id
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponseDto'
+        '400':
+          description: Invalid sort parameters
+
+  /user/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      description: Retrieve a specific user by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+        '404':
+          description: User not found
+    put:
+      tags:
+        - Users
+      summary: Update user
+      description: Update an existing user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestDto'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+        '400':
+          description: Invalid input data
+        '404':
+          description: User not found
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Delete a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "User deleted"
+        '404':
+          description: User not found
+
+  /user/by-email/{email}:
+    get:
+      tags:
+        - Users
+      summary: Get user by email
+      description: Retrieve a specific user by email address
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+            format: email
+            example: "user@example.com"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+        '404':
+          description: User not found
+
+  /user:
+    post:
+      tags:
+        - Users
+      summary: Create new user
+      description: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestDto'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+        '400':
+          description: Invalid input data
+        '409':
+          description: User with this email already exists
+
+
 components:
   schemas:
     SignUpRequest:
@@ -198,8 +1214,8 @@ components:
           type: array
           items:
             type: string
-            enum: [ROLE_ADMIN, ROLE_USER]
-          example: ["ROLE_USER"]
+            enum: [ ROLE_ADMIN, ROLE_USER ]
+          example: [ "ROLE_USER" ]
           description: User roles
 
     UserResponse:
@@ -233,34 +1249,431 @@ components:
           items:
             type: integer
             format: int64
-          example: []
+          example: [ ]
           description: IDs of tasks created by this user
         assignedTaskIds:
           type: array
           items:
             type: integer
             format: int64
-          example: []
+          example: [ ]
           description: IDs of tasks assigned to this user
         roles:
           type: array
           items:
             type: string
-            enum: [ROLE_ADMIN, ROLE_USER]
-          example: ["ROLE_USER"]
+            enum: [ ROLE_ADMIN, ROLE_USER ]
+          example: [ "ROLE_USER" ]
           description: User roles
+
+    TaskRequest:
+      type: object
+      required:
+        - title
+        - description
+        - taskStatusId
+        - taskPriorityId
+        - authorId
+      properties:
+        title:
+          type: string
+          maxLength: 50
+          example: "Implement user authentication"
+          description: Task title
+        description:
+          type: string
+          maxLength: 350
+          example: "Implement JWT-based authentication system with Spring Security"
+          description: Task description
+        taskStatusId:
+          type: integer
+          format: int64
+          example: 1
+          description: ID of the task status
+        taskPriorityId:
+          type: integer
+          format: int64
+          example: 2
+          description: ID of the task priority
+        authorId:
+          type: integer
+          format: int64
+          example: 1
+          description: ID of the task author
+        assigneeId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 2
+          description: ID of the task assignee (optional)
+
+    TaskResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: Task ID
+        title:
+          type: string
+          example: "Implement user authentication"
+          description: Task title
+        description:
+          type: string
+          example: "Implement JWT-based authentication system with Spring Security"
+          description: Task description
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15 10:30:00"
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15 11:45:00"
+          description: Last update timestamp
+        status:
+          type: string
+          example: "IN_PROGRESS"
+          description: Task status name
+        priority:
+          type: string
+          example: "HIGH"
+          description: Task priority name
+        author:
+          type: string
+          example: "john_doe"
+          description: Author username
+        assignee:
+          type: string
+          nullable: true
+          example: "jane_smith"
+          description: Assignee username
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskCommentResponse'
+          description: List of task comments
+
+    TaskCommentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: Comment ID
+        content:
+          type: string
+          example: "This task is progressing well"
+          description: Comment content
+        author:
+          type: string
+          example: "john_doe"
+          description: Comment author username
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T12:00:00Z"
+          description: Comment creation timestamp
+
+    PageTaskResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResponse'
+          description: Page content
+        totalElements:
+          type: integer
+          format: int64
+          example: 25
+          description: Total number of elements
+        totalPages:
+          type: integer
+          format: int32
+          example: 9
+          description: Total number of pages
+        size:
+          type: integer
+          format: int32
+          example: 3
+          description: Number of elements per page
+        number:
+          type: integer
+          format: int32
+          example: 0
+          description: Current page number (0-based)
+        first:
+          type: boolean
+          example: true
+          description: Is first page
+        last:
+          type: boolean
+          example: false
+          description: Is last page
+        numberOfElements:
+          type: integer
+          format: int32
+          example: 3
+          description: Number of elements in current page
+        empty:
+          type: boolean
+          example: false
+          description: Is page empty
 
     ErrorResponse:
       type: object
       properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15 10:30:00"
+          description: Error timestamp
+        status:
+          type: integer
+          example: 400
+          description: HTTP status code
+        error:
+          type: string
+          example: "Bad Request"
+          description: Error type
         message:
           type: string
           example: "Validation failed"
+          description: Error message
+        path:
+          type: string
+          example: "/auth/sign-up"
+          description: Request path
         errors:
           type: array
           items:
             type: string
-          example: ["Password must be at least 8 characters long"]
+          example: [ "Password must be at least 8 characters long" ]
+          description: Detailed error messages
+
+    TaskCommentRequestDto:
+      type: object
+      required:
+        - comment
+        - taskId
+        - authorId
+      properties:
+        comment:
+          type: string
+          maxLength: 200
+          example: "This task is progressing well"
+          description: Comment content (max 200 characters)
+        taskId:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+          description: ID of the task
+        authorId:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 2
+          description: ID of the comment author
+
+    TaskCommentResponseDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: Comment ID
+        comment:
+          type: string
+          example: "This task is progressing well"
+          description: Comment content
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15 12:00:00"
+          description: Comment creation timestamp
+        author:
+          type: string
+          example: "john_doe"
+          description: Comment author username
+        taskId:
+          type: integer
+          format: int64
+          example: 1
+          description: ID of the task
+
+
+    TaskPriorityRequestDto:
+      type: object
+      required:
+        - name
+        - taskId
+        - authorId
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+          description: Task priority ID (optional for create, required for update)
+        name:
+          type: string
+          maxLength: 30
+          example: "High"
+          description: Priority name
+        taskId:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+          description: ID of the task
+        authorId:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 2
+          description: ID of the author
+
+    TaskPriorityResponseDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: Task priority ID
+        name:
+          type: string
+          example: "High"
+          description: Priority name
+
+
+    TaskStatusRequestDto:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+          description: Task status ID (optional for create, required for update)
+        name:
+          type: string
+          maxLength: 30
+          example: "In Progress"
+          description: Status name
+
+    TaskStatusResponseDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: Task status ID
+        name:
+          type: string
+          example: "In Progress"
+          description: Status name
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15 10:30:00"
+          description: Last update timestamp
+
+
+# users
+
+    UserRequestDto:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+          description: User ID (optional for create, required for update)
+        email:
+          type: string
+          format: email
+          maxLength: 50
+          example: "user@example.com"
+          description: User email address
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 255
+          example: "password123"
+          description: User password
+        name:
+          type: string
+          maxLength: 30
+          example: "John Doe"
+          description: User full name
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+          description: User roles
+
+    UserResponseDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: User ID
+        email:
+          type: string
+          example: "user@example.com"
+          description: User email address
+        name:
+          type: string
+          example: "John Doe"
+          description: User full name
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15 10:30:00"
+          description: User creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-15 10:30:00"
+          description: Last update timestamp
+        authoredTaskIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          example: [1, 2, 3]
+          description: IDs of tasks authored by this user
+        assignedTaskIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          example: [4, 5, 6]
+          description: IDs of tasks assigned to this user
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+          description: User roles
+
 
   securitySchemes:
     bearerAuth:
@@ -269,4 +1682,21 @@ components:
       bearerFormat: JWT
 
 security:
-  - bearerAuth: []
+  - bearerAuth: [ ]
+
+tags:
+  - name: Authentication
+    description: User authentication, registration and token management
+  - name: Tasks
+    description: Create, read, update and delete tasks with filtering and sorting
+  - name: Comments
+    description: Manage task comments - create, edit, delete and retrieve comments
+  - name: Task Priorities
+    description: System task priority levels management and configuration
+  - name: Task Statuses
+    description: Task workflow status management and state transitions
+  - name: Users
+    description: User account management, profiles and permissions
+
+
+
