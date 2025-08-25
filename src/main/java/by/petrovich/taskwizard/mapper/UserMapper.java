@@ -1,5 +1,6 @@
 package by.petrovich.taskwizard.mapper;
 
+import by.petrovich.taskwizard.dto.request.SignUpRequestDto;
 import by.petrovich.taskwizard.dto.request.UserRequestDto;
 import by.petrovich.taskwizard.dto.response.UserResponseDto;
 import by.petrovich.taskwizard.model.Task;
@@ -15,12 +16,16 @@ import org.mapstruct.ReportingPolicy;
 public interface UserMapper {
     @Mapping(target = "authoredTaskIds", source = "authoredTasks")
     @Mapping(target = "assignedTaskIds", source = "assignedTasks")
-    UserResponseDto toResponseDto(User user);
+    UserResponseDto toRequestDto(User user);
 
     User toEntity(UserRequestDto userRequestDto);
 
     @Mapping(target = "id", ignore = true)
     User toEntityUpdate(UserRequestDto userRequestDto, @MappingTarget User user);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "name", source = "userName")
+    UserRequestDto toRequestDto(SignUpRequestDto signUpRequestDto);
 
     @Mapping(target = "id", source = "id")
     @Named("mapUser")

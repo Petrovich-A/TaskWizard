@@ -1,5 +1,6 @@
 package by.petrovich.taskwizard.dto.response;
 
+import by.petrovich.taskwizard.model.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +28,7 @@ public class UserResponseDto {
     private Set<Long> authoredTaskIds;
 
     private Set<Long> assignedTaskIds;
+
+    private Set<Role> roles;
+
 }

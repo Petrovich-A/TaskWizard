@@ -19,3 +19,11 @@ databaseChangeLog:
       file: db/changelog/changeset/009__CreateTaskCommentTable.sql
   - include:
       file: db/changelog/changeset/010__PopulateTaskCommentTable.sql
+  - include:
+      file: db/changelog/changeset/011__CreateRoleTable.sql
+  - include:
+      file: db/changelog/changeset/012__PopulateRoleTable.sql
+  - include:
+      file: db/changelog/changeset/013__CreateUserRoleTable.sql
+  - include:
+      file: db/changelog/changeset/014__PopulateUserRoleTable.sql
