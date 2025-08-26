@@ -3,9 +3,15 @@ package by.petrovich.taskwizard.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 @Data
+@Builder
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class SignInRequestDto {
     @NotBlank(message = "Email is required.")
     @Email(message = "Email should be valid.")

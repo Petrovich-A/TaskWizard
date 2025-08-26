@@ -4,11 +4,13 @@ import by.petrovich.taskwizard.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Set;
 
 @Data
 @AllArgsConstructor
+@RequiredArgsConstructor
 @Builder
 public class JwtAuthenticationResponseDto {
     private Long userId;
