@@ -228,4 +228,120 @@ class AuthControllerTest {
         assertThat(savedUser).isNotPresent();
     }
 
+    @Test
+    void signUp_WithInvalidEmail_ShouldReturn400BadRequest() {
+        // Given
+        SignUpRequestDto signUpRequestDto = SignUpRequestDto.builder()
+                .userName("TestUser")
+                .email("invalid-email")
+                .password("Password123")
+                .build();
+
+        // When
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                baseUrl + "/sign-up",
+                signUpRequestDto,
+                String.class
+        );
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).contains("email", "invalid");
+    }
+
+    @Test
+    void signUp_WithWeakPassword_ShouldReturn400BadRequest() {
+        // Given
+        SignUpRequestDto signUpRequestDto = SignUpRequestDto.builder()
+                .userName("TestUser")
+                .email("test@example.com")
+                .password("weak")
+                .build();
+
+        // When
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                baseUrl + "/sign-up",
+                signUpRequestDto,
+                String.class
+        );
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).contains("password");
+        assertThat(response.getBody()).contains("must be between 8 and 255 characters");
+    }
+
+    @Test
+    void signUp_WithEmptyFields_ShouldReturn400BadRequest() {
+        // Given
+        SignUpRequestDto signUpRequestDto = SignUpRequestDto.builder()
+                .userName("")
+                .email("")
+                .password("")
+                .build();
+
+        // When
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                baseUrl + "/sign-up",
+                signUpRequestDto,
+                String.class
+        );
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).contains("must not be blank");
+        assertThat(response.getBody()).contains("password");
+        assertThat(response.getBody()).contains("userName");
+        assertThat(response.getBody()).contains("email");
+    }
+
+
+    @Test
+    void signUp_WithNullFields_ShouldReturn400BadRequest() {
+        // Given
+        SignUpRequestDto signUpRequestDto = new SignUpRequestDto();
+        signUpRequestDto.setUserName(null);
+        signUpRequestDto.setEmail(null);
+        signUpRequestDto.setPassword(null);
+
+        // When
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                baseUrl + "/sign-up",
+                signUpRequestDto,
+                String.class
+        );
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).contains("must not be blank");
+        assertThat(response.getBody()).contains("password");
+        assertThat(response.getBody()).contains("userName");
+        assertThat(response.getBody()).contains("email");
+    }
+
+
+    @Test
+    void signUp_WithSQLInjectionAttempt_ShouldHandleSafely() {
+        // Given
+        String sqlInjection = "test'; DROP TABLE users; --";
+        SignUpRequestDto signUpRequestDto = SignUpRequestDto.builder()
+                .userName("TestUser")
+                .email(sqlInjection + "@example.com")
+                .password("Password123")
+                .build();
+
+        // When
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                baseUrl + "/sign-up",
+                signUpRequestDto,
+                String.class
+        );
+
+        // Then
+        assertThat(response.getStatusCode()).isNotEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        // Cleanup
+        userRepository.findByEmail(sqlInjection + "@example.com").ifPresent(userRepository::delete);
+    }
+
 }
