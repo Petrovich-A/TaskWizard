@@ -34,6 +34,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authorize) -> {
                     authorize.requestMatchers("/api/v1/auth/**").permitAll();
+                    authorize.requestMatchers("/health").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,
                             "/swagger-ui/**",
                             "/webjars/**",
