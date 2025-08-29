@@ -2,14 +2,15 @@ package by.petrovich.taskwizard.service.impl;
 
 import by.petrovich.taskwizard.dto.request.UserRequestDto;
 import by.petrovich.taskwizard.dto.response.UserResponseDto;
-import by.petrovich.taskwizard.exception.UserNotFoundException;
+import by.petrovich.taskwizard.exception.AppException;
+import by.petrovich.taskwizard.exception.ErrorType;
 import by.petrovich.taskwizard.mapper.UserMapper;
 import by.petrovich.taskwizard.model.User;
 import by.petrovich.taskwizard.repository.UserRepository;
 import by.petrovich.taskwizard.service.UserService;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,65 +18,74 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static by.petrovich.taskwizard.exception.ErrorType.DATA_INTEGRITY_VIOLATION;
+import static by.petrovich.taskwizard.exception.ErrorType.ENTITY_NOT_FOUND_ON_UPDATE;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     @Override
     public List<UserResponseDto> findAll(Sort sort) {
         List<User> users = userRepository.findAll(sort);
         return users.stream()
-                .map(userMapper::toResponseDto)
+                .map(userMapper::toRequestDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserResponseDto find(Long id) throws UserNotFoundException {
+    public UserResponseDto find(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"));
-        return userMapper.toResponseDto(user);
+                .orElseThrow(() -> new AppException(ErrorType.ENTITY_NOT_FOUND, User.class.getSimpleName()));
+        return userMapper.toRequestDto(user);
     }
 
     @Override
-    public UserResponseDto find(String email) throws UserNotFoundException {
+    public UserResponseDto find(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email " + email + " not found"));
-        return userMapper.toResponseDto(user);
+                .orElseThrow(() -> new AppException(ErrorType.ENTITY_NOT_FOUND, User.class.getSimpleName()));
+        return userMapper.toRequestDto(user);
     }
 
     @Override
     @Transactional
     public UserResponseDto create(UserRequestDto userRequestDto) {
-        User user = userMapper.toEntity(userRequestDto);
-        User saved = userRepository.saveAndFlush(user);
-        entityManager.refresh(saved);
-        return userMapper.toResponseDto(saved);
+        try {
+            User user = userMapper.toEntity(userRequestDto);
+            User saved = userRepository.saveAndFlush(user);
+            entityManager.refresh(saved);
+            return userMapper.toRequestDto(saved);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(DATA_INTEGRITY_VIOLATION, User.class.getSimpleName());
+        }
     }
 
     @Override
     @Transactional
-    public UserResponseDto update(Long id, UserRequestDto userRequestDto) throws UserNotFoundException {
+    public UserResponseDto update(Long id, UserRequestDto userRequestDto) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"));
+                .orElseThrow(() -> new AppException(ErrorType.ENTITY_NOT_FOUND, User.class.getSimpleName()));
 
         User updatedUser = userMapper.toEntityUpdate(userRequestDto, existingUser);
         User saved = userRepository.save(updatedUser);
-        return userMapper.toResponseDto(saved);
+        return userMapper.toRequestDto(saved);
     }
 
     @Override
     @Transactional
-    public void delete(Long id) throws UserNotFoundException {
-        if (userRepository.existsById(id)) {
+    public void delete(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new AppException(ENTITY_NOT_FOUND_ON_UPDATE, User.class.getSimpleName());
+        }
+
+        try {
             userRepository.deleteById(id);
-        } else {
-            throw new UserNotFoundException("User with id " + id + " not found");
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(DATA_INTEGRITY_VIOLATION, User.class.getSimpleName());
         }
     }
 

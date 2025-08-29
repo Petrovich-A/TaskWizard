@@ -4,8 +4,8 @@ This test assignment for potential employers demonstrates my practical skills as
 ## Table of Contents
 - [About the Project](#about-the-project)
 - [Tech Stack](#tech-stack)
+- [Requirements](#requirements)
 - [Getting Started](#getting-started)
-- [Run Locally](#run-locally)
 - [Contact](#contact)
 
 ---
@@ -33,92 +33,128 @@ This project showcases my ability to design and implement a real-world RESTful s
 
 ## Tech Stack
 
-* Java 17+ ☕
-* Spring Boot  
-* Spring Security (JWT Authentication) 🔐  
-* PostgreSQL (or MySQL) 🐘 / 🐬  
-* Docker & Docker Compose 🐳  
-* Maven / Gradle  
-* OpenAPI & Swagger UI 📄  
-* JUnit & Mockito (for testing) 🧪  
+- **Java 17** ☕
+- **Spring Boot**  
+- **Spring Security (JWT Authentication)** 🔐  
+- **PostgreSQL** 🐘  
+- **Docker & Docker Compose** 🐳  
+- **Gradle** 📦
+- **OpenAPI & Swagger UI** 📄  
+- **JUnit & Mockito (for testing)** 🧪  
 
 ---
+
+## Requirements
+
+Before starting, ensure you have installed:
+- **Docker** and **Docker Compose** - [Download here](https://www.docker.com/products/docker-desktop/)
+
+> Note: No need to install Java or Gradle separately - everything runs in containers.
 
 ## Getting Started
 
-### Prerequisites
+### Step 1: Create Environment Configuration
 
-- Java 17 or higher installed  
-- Docker and Docker Compose installed  
-- PostgreSQL or MySQL database (configured in `application.properties`)  
-- Maven or Gradle (depending on project setup)  
+Create a file named `.env` in the project root directory with your configuration:
 
-### Setup
+```env
+DATASOURCE_USERNAME=your_username_here
+DATASOURCE_PASSWORD=your_secure_password_here
+HIBERNATE_DDL_AUTO=validate
+LIQUIBASE_ENABLED=true
+JWT_SECRET_KEY=your-random-secret-key-here
+```
 
-1. Clone the repository:
+JWT_SECRET_KEY: Generate with:
 
 ```bash
-   git clone https://github.com/yourusername/task-management-system.git
-   cd task-management-system
+[Convert]::ToBase64String((1..32 | ForEach-Object {Get-Random -Maximum 256}))
 ```
 
-2. Configure your database connection in `src/main/resources/application.properties`:
+Use a strong, unique value. Don't expose it.
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/taskwizard
-spring.datasource.username=your_db_user
-spring.datasource.password=your_db_password
-```
+### Step 2: Start the Application
 
-3. (Optional) Adjust JWT and security settings if needed.
-
----
-
-## Run Locally
-
-### Using Docker Compose (recommended for dev environment)
-
-Start PostgreSQL and the application with Docker Compose:
+Run the following command to start all services:
 
 ```bash
-docker-compose up --build
+docker compose up -d
 ```
 
-This will launch the database and the Spring Boot app.
+### Step 3: Verify Application Status
 
----
-
-### Running without Docker
-
-1. Make sure your PostgreSQL/MySQL database is running locally and accessible.
-
-2. Build the project:
+Wait a moment for containers to initialize, then check if the application is running:
 
 ```bash
-./gradlew build
+docker compose ps
 ```
 
-3. Run the application from IntelliJ IDEA or via command line:
+### Health Check
 
 ```bash
-java -jar target/task-management-system.jar
+curl http://localhost:8080/health
 ```
 
-or run the main class directly from your IDE.
+The application will be available at: **http://localhost:8080**
 
----
+## 📖 API Documentation
 
-### Access Swagger UI
+Access the interactive API documentation:
+- **Swagger UI:** http://localhost:8080/swagger-ui.html
+- **OpenAPI specification:** http://localhost:8080/v3/api-docs
 
-Once the app is running, open your browser and go to:
+## 🔐 Key Endpoints
 
+### Authentication
+- `POST /api/v1/auth/sign-up` - User registration
+- `POST /api/v1/auth/sign-in` - User login
+
+### Tasks (Requires Authentication)
+- `GET /api/v1/task/tasks` - Get paginated task list
+- `GET /api/v1/task/sort` - Get sorted task list
+- `GET /api/v1/task/{id}` - Get task by ID
+- `POST /api/v1/task` - Create new task
+- `PUT /api/v1/task/{id}` - Update task
+- `DELETE /api/v1/task/{id}` - Delete task
+
+## 🐛 Troubleshooting
+
+### Check Application Logs
+```bash
+docker compose logs app -f
 ```
-http://localhost:8080/swagger-ui.html
+
+### Check Database Status
+```bash
+docker compose logs postgres
 ```
 
-Here you can explore and test all API endpoints.
+### Restart Specific Service
+```bash
+docker compose restart app
+docker compose restart postgres
+```
 
----
+### Complete Reset and Clean Start
+```bash
+docker compose down -v
+docker compose up -d --build
+```
+
+## 📊 Service Ports
+
+- **Application API:** 8080 (http://localhost:8080)
+- **PostgreSQL Database:** 5432
+
+## 🔧 Development Mode
+
+To run the application outside Docker for development:
+```bash
+# Requires JDK 17+ and Gradle installed
+./gradlew bootRun
+```
+
+> Note: In development mode, ensure you have PostgreSQL running locally and update connection settings accordingly.
 
 ## Contact
 
@@ -126,7 +162,3 @@ Here you can explore and test all API endpoints.
 Petrovich Alexandr - [@Petrovich Alexandr](https://www.linkedin.com/in/alexandr-petrovich/)
 
 📩 a.piatrovich@gmail.com
-
----
-🚀 Happy coding!
-```
