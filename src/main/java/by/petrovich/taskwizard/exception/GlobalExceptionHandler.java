@@ -25,24 +25,17 @@ public class GlobalExceptionHandler {
 
         ErrorType errorType = e.getErrorType();
 
-        HttpStatus status = switch (errorType) {
-            case USER_NOT_FOUND_DURING_AUTHENTICATION -> HttpStatus.UNAUTHORIZED;
-            case ENTITY_NOT_FOUND, ASSIGNEE_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case ENTITY_ALREADY_EXISTS, DATA_INTEGRITY_VIOLATION -> HttpStatus.CONFLICT;
-            case ENTITY_CREATION_FAILED, ENTITY_UPDATE_FAILED, ENTITY_DELETION_FAILED -> HttpStatus.BAD_REQUEST;
-            case ENTITY_DELETION_FORBIDDEN, TASK_MODIFICATION_FORBIDDEN -> HttpStatus.FORBIDDEN;
-            default -> HttpStatus.INTERNAL_SERVER_ERROR;
-        };
-
-        String message = String.format(errorType.getDescription(), e.getParams());
+        String message = (e.getParams() != null)
+                ? String.format(errorType.getDescription(), e.getParams())
+                : errorType.getDescription();
 
         ErrorResponse errorResponse = ErrorResponse.build(
                 errorType.name(),
-                status.value(),
+                errorType.getStatus().value(),
                 message,
                 request.getRequestURI());
 
-        return ResponseEntity.status(status)
+        return ResponseEntity.status(errorType.getStatus())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(errorResponse);
     }
