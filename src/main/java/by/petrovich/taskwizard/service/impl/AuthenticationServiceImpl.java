@@ -13,7 +13,6 @@ import by.petrovich.taskwizard.model.User;
 import by.petrovich.taskwizard.repository.RoleRepository;
 import by.petrovich.taskwizard.repository.UserRepository;
 import by.petrovich.taskwizard.security.CustomUserDetails;
-import by.petrovich.taskwizard.security.CustomUserDetailsService;
 import by.petrovich.taskwizard.security.JwtTokenProvider;
 import by.petrovich.taskwizard.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +35,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserServiceImpl userService;
-    private final CustomUserDetailsService customUserDetailsService;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
@@ -68,28 +65,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 signInRequestDto.getEmail(),
                 signInRequestDto.getPassword()
         ));
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(signInRequestDto.getEmail());
-
-        Authentication newAuthentication = new UsernamePasswordAuthenticationToken(
-                userDetails,
-                authentication.getCredentials(),
-                userDetails.getAuthorities()
-        );
-
-        Set<Role> roles = userDetails.getAuthorities().stream()
+        Set<Role> roles = authentication.getAuthorities().stream()
                 .map(grantedAuthority -> new Role(grantedAuthority.getAuthority()))
                 .collect(Collectors.toSet());
 
-        SecurityContextHolder.getContext().setAuthentication(newAuthentication);
-
-        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        Long userId = customUserDetails.getId();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtTokenProvider.generateToken(authentication);
 
         return JwtAuthenticationResponseDto.builder()
-                .userId(userId)
+                .userId(customUserDetails.getId())
                 .accessToken(jwt)
                 .email(signInRequestDto.getEmail())
                 .name(customUserDetails.getUsername())
