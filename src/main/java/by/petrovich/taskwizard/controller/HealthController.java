@@ -8,8 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+
+import static by.petrovich.taskwizard.constant.Constant.DATE_TIME_FORMAT_PATTERN;
 
 @RestController
 public class HealthController {
@@ -37,8 +41,9 @@ public class HealthController {
             status = "DOWN";
         }
 
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT_PATTERN);
         response.put("status", status);
-        response.put("timestamp", Instant.now().toString());
+        response.put("timestamp", LocalDateTime.now().format(dateTimeFormatter));
         response.put("service", serviceName);
         response.put("uptime_seconds", Duration.between(startTime, Instant.now()).getSeconds());
 

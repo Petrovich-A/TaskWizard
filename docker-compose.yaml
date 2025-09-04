@@ -6,6 +6,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      TZ: Europe/Minsk
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/taskWizard
       SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
@@ -20,6 +21,7 @@ services:
   postgres:
     image: postgres:15
     environment:
+      TZ: Europe/Minsk
       POSTGRES_USER: ${DATASOURCE_USERNAME}
       POSTGRES_PASSWORD: ${DATASOURCE_PASSWORD}
       POSTGRES_DB: taskWizard
