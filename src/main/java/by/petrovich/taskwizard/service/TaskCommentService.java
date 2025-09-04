@@ -12,9 +12,7 @@ public interface TaskCommentService {
 
     TaskCommentResponseDto find(Long id);
 
-    @Transactional
     TaskCommentResponseDto create(TaskCommentRequestDto taskCommentRequestDto);
 
-    @Transactional
     void delete(Long id);
 }

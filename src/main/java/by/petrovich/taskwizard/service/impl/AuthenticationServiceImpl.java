@@ -15,6 +15,7 @@ import by.petrovich.taskwizard.repository.UserRepository;
 import by.petrovich.taskwizard.security.CustomUserDetails;
 import by.petrovich.taskwizard.security.CustomUserDetailsService;
 import by.petrovich.taskwizard.security.JwtTokenProvider;
+import by.petrovich.taskwizard.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationServiceImpl {
+public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserServiceImpl userService;
@@ -42,6 +43,7 @@ public class AuthenticationServiceImpl {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Override
     @Transactional
     public UserResponseDto signUp(SignUpRequestDto signUpRequestDto) {
         if (userRepository.existsByEmail(signUpRequestDto.getEmail())) {
@@ -60,6 +62,7 @@ public class AuthenticationServiceImpl {
         return userService.create(userRequestDto);
     }
 
+    @Override
     public JwtAuthenticationResponseDto signIn(SignInRequestDto signInRequestDto) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 signInRequestDto.getEmail(),

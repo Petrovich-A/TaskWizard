@@ -2,7 +2,7 @@ package by.petrovich.taskwizard.controller;
 
 import by.petrovich.taskwizard.dto.request.TaskRequestDto;
 import by.petrovich.taskwizard.dto.response.TaskResponseDto;
-import by.petrovich.taskwizard.service.impl.TaskServiceImpl;
+import by.petrovich.taskwizard.service.TaskService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
@@ -15,7 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -38,7 +37,7 @@ import static org.springframework.http.HttpStatus.OK;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class TaskController {
-    private final TaskServiceImpl taskService;
+    private final TaskService taskService;
 
     @GetMapping("/tasks")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")

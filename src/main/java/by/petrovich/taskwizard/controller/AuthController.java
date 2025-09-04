@@ -4,7 +4,7 @@ import by.petrovich.taskwizard.dto.request.SignInRequestDto;
 import by.petrovich.taskwizard.dto.request.SignUpRequestDto;
 import by.petrovich.taskwizard.dto.response.JwtAuthenticationResponseDto;
 import by.petrovich.taskwizard.dto.response.UserResponseDto;
-import by.petrovich.taskwizard.service.impl.AuthenticationServiceImpl;
+import by.petrovich.taskwizard.service.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @AllArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-    private final AuthenticationServiceImpl authenticationService;
+    private final AuthenticationService authenticationService;
 
     @PostMapping("/sign-up")
     public ResponseEntity<UserResponseDto> signUp(@RequestBody @Valid SignUpRequestDto signUpRequestDto) {
