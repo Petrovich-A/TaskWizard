@@ -232,20 +232,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JwtAuthResponse'
-        '401':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+
         '400':
           description: Invalid input data
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_input:
+                  $ref: '#/components/examples/ErrorResponseInvalidInputExample'
 
-#tasks
+        '401':
+          description: Unauthorized - bad credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
+                bad_credentials:
+                  $ref: '#/components/examples/ErrorResponseBadCredentialsExample'
+
+        '404':
+          description: User not found during authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                user_not_found:
+                  $ref: '#/components/examples/ErrorResponseUserNotFoundDuringAuthenticationExample'
+
+  #tasks
 
   /task/tasks:
     get:
@@ -283,8 +303,19 @@ paths:
                 $ref: '#/components/schemas/PageTaskResponse'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /task/sort:
     get:
@@ -323,6 +354,13 @@ paths:
           description: Invalid sort direction
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -353,6 +391,13 @@ paths:
           description: Task not found
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -401,6 +446,13 @@ paths:
           description: Author not found
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -449,6 +501,13 @@ paths:
           description: Assignee not found
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -477,6 +536,13 @@ paths:
           description: Invalid input data
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -514,6 +580,13 @@ paths:
           description: Task not found
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -539,6 +612,13 @@ paths:
           description: Task not found
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -548,9 +628,9 @@ paths:
         - Tasks
       summary: Update task status
       description: |
-       Update the status of a task status. Accessible by USER and ADMIN roles.
-       - Users can update task status only for their own tasks (where they are assigned as executor)
-       - Admins can update task status for any task
+        Update the status of a task status. Accessible by USER and ADMIN roles.
+        - Users can update task status only for their own tasks (where they are assigned as executor)
+        - Admins can update task status for any task
       security:
         - bearerAuth: [ ]
       parameters:
@@ -581,6 +661,13 @@ paths:
           description: Task or status not found
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -623,6 +710,13 @@ paths:
           description: Task or priority not found
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -660,6 +754,13 @@ paths:
           description: Task or author not found
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
@@ -697,10 +798,17 @@ paths:
           description: Task or assignee not found
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
 
-# comments
+  # comments
 
   /comment/comments:
     get:
@@ -848,6 +956,7 @@ paths:
         '403':
           description: Forbidden
 
+  # priorities
 
   /priority/priorities:
     get:
@@ -982,6 +1091,7 @@ paths:
         '400':
           description: Invalid input data
 
+  # statuses
 
   /status/statuses:
     get:
@@ -1116,8 +1226,7 @@ paths:
         '400':
           description: Invalid input data
 
-
-# users
+  # users
 
   /user/users:
     get:
@@ -1132,7 +1241,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [ASC, DESC]
+            enum: [ ASC, DESC ]
             default: ASC
         - name: sortBy
           in: query
@@ -1558,6 +1667,25 @@ components:
           example: false
           description: Is page empty
 
+    RoleResponse:
+      type: object
+      description: Role entity representing user roles in the system.
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the role (auto-generated).
+          example: 1
+          readOnly: true
+        name:
+          type: string
+          description: Name of the role (e.g., ADMIN, USER).
+          example: "USER"
+      required:
+        - name
+
+    # errors
+
     ErrorResponse:
       type: object
       properties:
@@ -1722,8 +1850,7 @@ components:
           example: "2024-01-15 10:30:00"
           description: Last update timestamp
 
-
-# users
+    # users
 
     UserRequestDto:
       type: object
@@ -1759,7 +1886,7 @@ components:
         roles:
           type: array
           items:
-            $ref: '#/components/schemas/Role'
+            $ref: '#/components/schemas/RoleResponse'
           description: User roles
 
     UserResponseDto:
@@ -1793,20 +1920,63 @@ components:
           items:
             type: integer
             format: int64
-          example: [1, 2, 3]
+          example: [ 1, 2, 3 ]
           description: IDs of tasks authored by this user
         assignedTaskIds:
           type: array
           items:
             type: integer
             format: int64
-          example: [4, 5, 6]
+          example: [ 4, 5, 6 ]
           description: IDs of tasks assigned to this user
         roles:
           type: array
           items:
-            $ref: '#/components/schemas/Role'
+            $ref: '#/components/schemas/RoleResponse'
           description: User roles
+
+  # examples
+
+  examples:
+    ErrorResponseUnauthorizedExample:
+      summary: Example of general unauthorized
+      value:
+        type: "/errors/unauthorized"
+        title: "unauthorized"
+        status: 401
+        detail: "Access is denied. Authorization is required."
+        instance: "/api/v1/auth/sign-in"
+        timestamp: "2025-09-04 19:10:01"
+
+    ErrorResponseInvalidInputExample:
+      summary: Example of invalid input
+      value:
+        type: "/errors/invalid_input"
+        title: "invalid input"
+        status: 400
+        detail: "Some field is invalid."
+        instance: "/api/v1/auth/sign-in"
+        timestamp: "2025-09-04 19:30:00"
+
+    ErrorResponseBadCredentialsExample:
+      summary: Example of bad credentials
+      value:
+        type: "/errors/bad_credentials"
+        title: "bad credentials"
+        status: 401
+        detail: "Authentication failed. Please check your credentials."
+        instance: "/api/v1/auth/sign-in"
+        timestamp: "2025-09-04 19:27:36"
+
+    ErrorResponseUserNotFoundDuringAuthenticationExample:
+      summary: Example of user not found during authentication
+      value:
+        type: "/errors/user_not_found_during_authentication"
+        title: "user not found during authentication"
+        status: 404
+        detail: "Authentication failed: User not found with email: user@example.com."
+        instance: "/api/v1/auth/sign-in"
+        timestamp: "2025-09-04 19:21:22"
 
 
   securitySchemes:
