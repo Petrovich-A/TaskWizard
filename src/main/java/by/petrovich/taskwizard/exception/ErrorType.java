@@ -49,7 +49,8 @@ public enum ErrorType {
     TASK_MODIFICATION_FORBIDDEN("You do not have permission to modify this task.", FORBIDDEN),
     INVALID_INPUT("The provided data is invalid and does not meet the required criteria.", BAD_REQUEST),
     USER_NOT_FOUND_DURING_AUTHENTICATION("Authentication failed: User not found with email: %s.", NOT_FOUND),
-    UNAUTHORIZED("Access is denied. Authorization is required.", HttpStatus.UNAUTHORIZED);
+    UNAUTHORIZED("Access is denied. Authorization is required.", HttpStatus.UNAUTHORIZED),
+    BAD_CREDENTIALS("Authentication failed. Please check your credentials.", HttpStatus.UNAUTHORIZED);
 
     private final String description;
     private final HttpStatus status;

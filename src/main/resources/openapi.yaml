@@ -179,7 +179,7 @@ paths:
                   password: "Fr@nk2025*Pwd!"
 
               regularUser3:
-                summary: Regular user John
+                summary: After sign-up User John
                 value:
                   email: "john.doe@example.com"
                   password: "securePassword123"
@@ -188,7 +188,7 @@ paths:
               invalidPassword:
                 summary: Wrong password
                 value:
-                  email: "john.doe@example.com"
+                  email: "eve@example.com"
                   password: "wrongpassword123"
 
               userNotFound:
@@ -218,6 +218,12 @@ paths:
                 summary: Email field missing
                 value:
                   password: "securePassword123"
+
+              passwordNotMatchToExist:
+                summary: Password does not match the existing one
+                value:
+                  email: "carol@example.com"
+                  password: "C@r0l#20021"
 
       responses:
         '200':

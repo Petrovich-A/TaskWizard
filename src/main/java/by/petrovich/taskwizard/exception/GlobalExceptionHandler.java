@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -75,6 +76,27 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles BadCredentialsException (authentication failures).
+     *
+     * @param e       the BadCredentialsException instance
+     * @param request the HTTP request object
+     * @return ResponseEntity with ErrorResponse
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException e, HttpServletRequest request) {
+        logger.debug("BadCredentialsException occurred: {}", e.getMessage(), e);
+
+        ErrorResponse errorResponse = ErrorResponse.build(
+                ErrorType.BAD_CREDENTIALS.name(),
+                ErrorType.BAD_CREDENTIALS.getStatus().value(),
+                ErrorType.BAD_CREDENTIALS.getDescription(),
+                request.getRequestURI()
+        );
+
+        return buildResponseEntity(ErrorType.BAD_CREDENTIALS.getStatus(), errorResponse);
+    }
+
+    /**
      * Handles general Exception by checking for AppException cause or falling back
      * to internal server error response.
      *
@@ -84,7 +106,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
-        logger.error(ErrorType.DEFAULT.getDescription(), e);
+        logger.error("Unexpected error occurred in request [{}] for URL '{}'. Exception class: {}, Message: {}",
+                request.getMethod(), request.getRequestURI(), e.getClass().getSimpleName(), e.getMessage(), e);
+        logger.debug("Full stack trace for exception: ", e);
 
         AppException cause = findCause(e, AppException.class);
 
@@ -133,9 +157,9 @@ public class GlobalExceptionHandler {
                         Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())));
 
         return errors.entrySet().stream()
-                .map(entry -> String.format("Field: '%s'\nMessages: '%s'",
+                .map(entry -> String.format("Field: '%s' Messages: '%s'",
                         entry.getKey(),
                         String.join(", ", entry.getValue())))
-                .collect(Collectors.joining("\n\n"));
+                .collect(Collectors.joining(" "));
     }
 }
