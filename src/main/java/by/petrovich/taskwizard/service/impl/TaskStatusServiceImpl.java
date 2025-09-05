@@ -2,20 +2,26 @@ package by.petrovich.taskwizard.service.impl;
 
 import by.petrovich.taskwizard.dto.request.TaskStatusRequestDto;
 import by.petrovich.taskwizard.dto.response.TaskStatusResponseDto;
-import by.petrovich.taskwizard.exception.TaskNotFoundException;
-import by.petrovich.taskwizard.exception.TaskStatusNotFoundException;
+import by.petrovich.taskwizard.exception.AppException;
+import by.petrovich.taskwizard.exception.ErrorType;
 import by.petrovich.taskwizard.mapper.TaskStatusMapper;
+import by.petrovich.taskwizard.model.Task;
 import by.petrovich.taskwizard.model.TaskStatus;
 import by.petrovich.taskwizard.repository.TaskStatusRepository;
 import by.petrovich.taskwizard.service.TaskStatusService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static by.petrovich.taskwizard.exception.ErrorType.DATA_INTEGRITY_VIOLATION;
+import static by.petrovich.taskwizard.exception.ErrorType.ENTITY_NOT_FOUND;
+import static by.petrovich.taskwizard.exception.ErrorType.ENTITY_NOT_FOUND_ON_UPDATE;
 
 @Service
 @RequiredArgsConstructor
@@ -33,39 +39,9 @@ public class TaskStatusServiceImpl implements TaskStatusService {
     }
 
     @Override
-    public TaskStatusResponseDto find(Long id) throws TaskNotFoundException {
+    public TaskStatusResponseDto find(Long id) {
         return taskStatusMapper.toResponseDto(taskStatusRepository.findById(id)
-                .orElseThrow(() -> new TaskStatusNotFoundException("Task status with id " + id + " not found")));
-    }
-
-    @Override
-    @Transactional
-    public TaskStatusResponseDto create(TaskStatusRequestDto taskStatusRequestDto) {
-        TaskStatus saved = taskStatusRepository.save(taskStatusMapper.toEntity(taskStatusRequestDto));
-        return taskStatusMapper.toResponseDto(saved);
-    }
-
-    @Override
-    @Transactional
-    public void delete(Long id) throws TaskNotFoundException {
-        if (taskStatusRepository.existsById(id)) {
-            taskStatusRepository.deleteById(id);
-        } else {
-            throw new TaskStatusNotFoundException("Task status not found");
-        }
-    }
-
-    @Override
-    @Transactional
-    public TaskStatusResponseDto update(Long id, TaskStatusRequestDto taskStatusRequestDto) throws TaskNotFoundException {
-        Optional<TaskStatus> optionalStatus = taskStatusRepository.findById(id);
-        if (optionalStatus.isEmpty()) {
-            throw new TaskNotFoundException("Task status not found");
-        } else {
-            TaskStatus statusUpdated = taskStatusMapper.toEntityUpdate(taskStatusRequestDto, optionalStatus.get());
-            TaskStatus saved = taskStatusRepository.save(statusUpdated);
-            return taskStatusMapper.toResponseDto(saved);
-        }
+                .orElseThrow(() -> new AppException(ErrorType.ENTITY_NOT_FOUND, TaskStatus.class.getSimpleName())));
     }
 
     @Override
@@ -74,6 +50,48 @@ public class TaskStatusServiceImpl implements TaskStatusService {
         return taskStatuses.stream()
                 .map(taskStatusMapper::toResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public TaskStatusResponseDto create(TaskStatusRequestDto taskStatusRequestDto) {
+        try {
+            TaskStatus saved = taskStatusRepository.save(taskStatusMapper.toEntity(taskStatusRequestDto));
+            return taskStatusMapper.toResponseDto(saved);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(DATA_INTEGRITY_VIOLATION, TaskStatus.class.getSimpleName());
+        }
+    }
+
+    @Override
+    @Transactional
+    public TaskStatusResponseDto update(Long id, TaskStatusRequestDto taskStatusRequestDto) {
+        try {
+            TaskStatus taskStatus = taskStatusRepository.findById(id).orElseThrow(() ->
+                    new AppException(ENTITY_NOT_FOUND, TaskStatus.class.getSimpleName()));
+            TaskStatus statusUpdated = taskStatusMapper.toEntityUpdate(taskStatusRequestDto, taskStatus);
+            TaskStatus saved = taskStatusRepository.save(statusUpdated);
+            return taskStatusMapper.toResponseDto(saved);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(DATA_INTEGRITY_VIOLATION, Task.class.getSimpleName());
+        } catch (
+                EntityNotFoundException e) {
+            throw new AppException(ENTITY_NOT_FOUND_ON_UPDATE, Task.class.getSimpleName());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!taskStatusRepository.existsById(id)) {
+            throw new AppException(ENTITY_NOT_FOUND, TaskStatus.class.getSimpleName());
+        }
+
+        try {
+            taskStatusRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(DATA_INTEGRITY_VIOLATION, TaskStatus.class.getSimpleName());
+        }
     }
 
 }

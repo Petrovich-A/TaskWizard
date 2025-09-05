@@ -2,7 +2,7 @@ package by.petrovich.taskwizard.controller;
 
 import by.petrovich.taskwizard.dto.request.UserRequestDto;
 import by.petrovich.taskwizard.dto.response.UserResponseDto;
-import by.petrovich.taskwizard.service.impl.UserServiceImpl;
+import by.petrovich.taskwizard.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 @Validated
 public class UserController {
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @GetMapping("/users")
     public ResponseEntity<List<UserResponseDto>> findAll(
