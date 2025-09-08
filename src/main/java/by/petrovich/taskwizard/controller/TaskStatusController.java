@@ -2,7 +2,7 @@ package by.petrovich.taskwizard.controller;
 
 import by.petrovich.taskwizard.dto.request.TaskStatusRequestDto;
 import by.petrovich.taskwizard.dto.response.TaskStatusResponseDto;
-import by.petrovich.taskwizard.service.impl.TaskStatusServiceImpl;
+import by.petrovich.taskwizard.service.TaskStatusService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 @Validated
 public class TaskStatusController {
-    private final TaskStatusServiceImpl taskStatusService;
+    private final TaskStatusService taskStatusService;
 
     @GetMapping("/statuses")
     public ResponseEntity<List<TaskStatusResponseDto>> findAll(@RequestParam(defaultValue = "ASC") String sortDirection,

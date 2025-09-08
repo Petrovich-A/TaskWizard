@@ -2,7 +2,7 @@ package by.petrovich.taskwizard.controller;
 
 import by.petrovich.taskwizard.dto.request.TaskPriorityRequestDto;
 import by.petrovich.taskwizard.dto.response.TaskPriorityResponseDto;
-import by.petrovich.taskwizard.service.impl.TaskPriorityServiceImpl;
+import by.petrovich.taskwizard.service.TaskPriorityService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 @Validated
 public class TaskPriorityController {
-    private final TaskPriorityServiceImpl taskPriorityService;
+    private final TaskPriorityService taskPriorityService;
 
     @GetMapping("/priorities")
     public ResponseEntity<List<TaskPriorityResponseDto>> findAll(@RequestParam(defaultValue = "ASC") String sortDirection,

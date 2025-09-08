@@ -2,7 +2,7 @@ package by.petrovich.taskwizard.controller;
 
 import by.petrovich.taskwizard.dto.request.TaskCommentRequestDto;
 import by.petrovich.taskwizard.dto.response.TaskCommentResponseDto;
-import by.petrovich.taskwizard.service.impl.TaskCommentServiceImpl;
+import by.petrovich.taskwizard.service.TaskCommentService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 @Validated
 public class CommentController {
-    private final TaskCommentServiceImpl commentService;
+    private final TaskCommentService commentService;
 
     @GetMapping("/comments")
     public ResponseEntity<List<TaskCommentResponseDto>> findAll(@RequestParam(defaultValue = "ASC") String sortDirection,

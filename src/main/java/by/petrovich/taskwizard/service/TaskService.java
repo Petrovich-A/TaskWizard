@@ -2,10 +2,6 @@ package by.petrovich.taskwizard.service;
 
 import by.petrovich.taskwizard.dto.request.TaskRequestDto;
 import by.petrovich.taskwizard.dto.response.TaskResponseDto;
-import by.petrovich.taskwizard.exception.TaskNotFoundException;
-import by.petrovich.taskwizard.exception.TaskPriorityNotFoundException;
-import by.petrovich.taskwizard.exception.TaskStatusNotFoundException;
-import by.petrovich.taskwizard.exception.UserNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,23 +13,23 @@ public interface TaskService {
 
     List<TaskResponseDto> findAll(Sort sort);
 
-    TaskResponseDto find(Long id) throws TaskNotFoundException;
+    TaskResponseDto find(Long id);
 
-    Page<TaskResponseDto> findByAuthor(Long authorId, Pageable pageable) throws TaskNotFoundException;
+    Page<TaskResponseDto> findByAuthor(Long authorId, Pageable pageable);
 
-    Page<TaskResponseDto> findByAssignee(Long assigneeId, Pageable pageable) throws TaskNotFoundException;
+    Page<TaskResponseDto> findByAssignee(Long assigneeId, Pageable pageable);
 
     TaskResponseDto create(TaskRequestDto TaskRequestDto);
 
-    void delete(Long id) throws TaskNotFoundException;
+    void delete(Long id);
 
-    TaskResponseDto update(Long id, TaskRequestDto taskRequestDto) throws TaskNotFoundException;
+    TaskResponseDto update(Long id, TaskRequestDto taskRequestDto);
 
-    TaskResponseDto updateStatus(Long id, Long statusId) throws TaskNotFoundException, TaskStatusNotFoundException;
+    TaskResponseDto updateStatus(Long id, Long statusId);
 
-    TaskResponseDto updateAuthor(Long taskId, Long userId) throws TaskNotFoundException, UserNotFoundException;
+    TaskResponseDto updateAuthor(Long taskId, Long userId);
 
-    TaskResponseDto updatePriority(Long taskId, Long priorityId) throws TaskNotFoundException, TaskPriorityNotFoundException;
+    TaskResponseDto updatePriority(Long taskId, Long priorityId);
 
-    TaskResponseDto updateAssignee(Long id, Long userId) throws TaskNotFoundException, UserNotFoundException;
+    TaskResponseDto updateAssignee(Long id, Long userId);
 }
