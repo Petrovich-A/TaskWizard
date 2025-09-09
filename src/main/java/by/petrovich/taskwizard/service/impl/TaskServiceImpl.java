@@ -9,7 +9,10 @@ import by.petrovich.taskwizard.model.Task;
 import by.petrovich.taskwizard.model.TaskPriority;
 import by.petrovich.taskwizard.model.TaskStatus;
 import by.petrovich.taskwizard.model.User;
+import by.petrovich.taskwizard.repository.TaskPriorityRepository;
 import by.petrovich.taskwizard.repository.TaskRepository;
+import by.petrovich.taskwizard.repository.TaskStatusRepository;
+import by.petrovich.taskwizard.repository.UserRepository;
 import by.petrovich.taskwizard.service.TaskService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,6 +39,9 @@ import static by.petrovich.taskwizard.exception.ErrorType.ENTITY_NOT_FOUND_ON_UP
 @Transactional(readOnly = true)
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
+    private final TaskStatusRepository taskStatusRepository;
+    private final TaskPriorityRepository taskPriorityRepository;
+    private final UserRepository userRepository;
     private final TaskMapper taskMapper;
     private final EntityManager entityManager;
 
@@ -80,7 +86,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskResponseDto create(TaskRequestDto taskRequestDto) {
         try {
-            Task taskToSave = taskMapper.toEntity(taskRequestDto);
+            Task taskToSave = taskMapper.toEntity(taskRequestDto, taskStatusRepository, taskPriorityRepository, userRepository);
             Task saved = taskRepository.saveAndFlush(taskToSave);
             return taskMapper.toResponseDto(saved);
         } catch (DataIntegrityViolationException e) {
@@ -93,7 +99,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponseDto update(Long id, TaskRequestDto taskRequestDto) {
         try {
             Task task = getTaskOrThrow(id);
-            taskMapper.toEntityUpdate(taskRequestDto, task);
+            taskMapper.toEntityUpdate(taskRequestDto, task, taskStatusRepository, taskPriorityRepository, userRepository);
             Task saved = taskRepository.saveAndFlush(task);
             return taskMapper.toResponseDto(saved);
         } catch (DataIntegrityViolationException e) {
