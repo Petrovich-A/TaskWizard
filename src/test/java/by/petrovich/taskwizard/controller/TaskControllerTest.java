@@ -2,20 +2,20 @@ package by.petrovich.taskwizard.controller;
 
 import by.petrovich.taskwizard.BaseIntegrationTest;
 import by.petrovich.taskwizard.dto.request.SignInRequestDto;
+import by.petrovich.taskwizard.dto.request.TaskRequestDto;
 import by.petrovich.taskwizard.dto.response.JwtAuthenticationResponseDto;
 import by.petrovich.taskwizard.dto.response.TaskCommentResponseDto;
 import by.petrovich.taskwizard.dto.response.TaskResponseDto;
 import by.petrovich.taskwizard.exception.ErrorResponse;
+import by.petrovich.taskwizard.repository.TaskRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,12 +33,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TaskControllerTest extends BaseIntegrationTest {
     private final Logger logger = LoggerFactory.getLogger(TaskControllerTest.class);
     private String baseUrl;
-    protected final String signInUrl = "/api/v1/auth/sign-in";
     private HttpHeaders userHeaders;
     private HttpHeaders adminHeaders;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private TaskRepository taskRepository;
 
     @BeforeAll
     void setUpAuth() {
@@ -61,23 +60,6 @@ class TaskControllerTest extends BaseIntegrationTest {
         adminHeaders.setBearerAuth(jwtTokenAdmin);
     }
 
-    private String getJwtToken(String email, String password) {
-        SignInRequestDto signInRequestDto = SignInRequestDto.builder()
-                .email(email)
-                .password(password)
-                .build();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<SignInRequestDto> signInEntity = new HttpEntity<>(signInRequestDto, headers);
-
-        ResponseEntity<JwtAuthenticationResponseDto> signInResponse = restTemplate.postForEntity(
-                signInUrl, signInEntity, JwtAuthenticationResponseDto.class
-        );
-
-        assertThat(signInResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        return signInResponse.getBody().getAccessToken();
-    }
-
     @Test
     void findAll_WithValidUserRole_ShouldReturnOkAndPageOfTasks() throws JsonProcessingException {
         // Given:
@@ -97,7 +79,6 @@ class TaskControllerTest extends BaseIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
 
-        ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(response.getBody());
 
         assertThat(jsonNode.path("content").size()).isGreaterThanOrEqualTo(0);
@@ -164,6 +145,37 @@ class TaskControllerTest extends BaseIntegrationTest {
     }
 
     @Test
+    void find_WithValidUserRole_ShouldReturn404WhenTaskNotFound() {
+        // Given
+        long nonExistentTaskId = 99L;
+        HttpEntity<Void> entity = new HttpEntity<>(userHeaders);
+
+        // When
+        ResponseEntity<ErrorResponse> response = restTemplate.exchange(
+                baseUrl + "/" + nonExistentTaskId,
+                HttpMethod.GET,
+                entity,
+                ErrorResponse.class
+        );
+
+        // Then
+        ErrorResponse expected = ErrorResponse.builder()
+                .type("/errors/entity_not_found")
+                .title("entity not found")
+                .status(404)
+                .detail("The requested Task was not found.")
+                .instance("/api/v1/task/" + nonExistentTaskId)
+                .build();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody())
+                .usingRecursiveComparison()
+                .ignoringFields("timestamp")
+                .isEqualTo(expected);
+    }
+
+    @Test
     void find_WithoutAuth_ShouldReturn401() {
         long taskId = 1L;
         HttpEntity<Void> entity = new HttpEntity<>(new HttpHeaders());
@@ -191,6 +203,165 @@ class TaskControllerTest extends BaseIntegrationTest {
                 .usingRecursiveComparison()
                 .ignoringFields("timestamp")
                 .isEqualTo(expected);
+    }
+
+    @Test
+    void findByAuthor_WithValidUserRole_ShouldReturnOkAndPageOfTasks() throws JsonProcessingException {
+        // Given:
+        long authorId = 1L;
+        int page = 0;
+        int size = 3;
+        HttpEntity<Void> entity = new HttpEntity<>(userHeaders);
+
+        // When:
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl + "/author/" + authorId + "?page=" + page + "&size=" + size,
+                HttpMethod.GET,
+                entity,
+                String.class
+        );
+
+        // Then:
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+
+        JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+        assertThat(jsonNode.path("content").size()).isEqualTo(3);
+        assertThat(jsonNode.path("totalElements").asLong()).isEqualTo(3);
+        assertThat(jsonNode.path("size").asInt()).isEqualTo(size);
+        assertThat(jsonNode.path("number").asInt()).isEqualTo(page);
+
+        JsonNode firstTask = jsonNode.path("content").get(0);
+        assertThat(firstTask.path("id").asLong()).isEqualTo(1L);
+        assertThat(firstTask.path("title").asText()).isEqualTo("Setup project");
+        assertThat(firstTask.path("author").asText()).isEqualTo("Alice");
+        assertThat(firstTask.path("comments").size()).isEqualTo(2);
+
+        assertThat(jsonNode.path("content").get(1).path("id").asLong()).isEqualTo(6L);
+        assertThat(jsonNode.path("content").get(2).path("id").asLong()).isEqualTo(46L);
+    }
+
+    @Test
+    void findByAssignee_WithValidUserRole_ShouldReturnOkAndPageOfTasks() throws JsonProcessingException {
+        // Given:
+        long assigneeId = 1L;
+        int page = 0;
+        int size = 3;
+        HttpEntity<Void> entity = new HttpEntity<>(userHeaders);
+
+        // When:
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl + "/assignee/" + assigneeId + "?page=" + page + "&size=" + size,
+                HttpMethod.GET,
+                entity,
+                String.class
+        );
+
+        // Then:
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+
+        JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+        assertThat(jsonNode.path("content").size()).isEqualTo(1);
+        assertThat(jsonNode.path("totalElements").asLong()).isEqualTo(1);
+        assertThat(jsonNode.path("size").asInt()).isEqualTo(size);
+        assertThat(jsonNode.path("number").asInt()).isEqualTo(page);
+
+        JsonNode firstTask = jsonNode.path("content").get(0);
+        assertThat(firstTask.path("id").asLong()).isEqualTo(41L);
+        assertThat(firstTask.path("title").asText()).isEqualTo("Bug fixing");
+        assertThat(firstTask.path("author").asText()).isEqualTo("Dave");
+        assertThat(firstTask.path("comments").size()).isEqualTo(2);
+
+        assertThat(firstTask.path("comments").get(0).path("comment").asText()).isEqualTo("QA retesting scheduled.");
+        assertThat(firstTask.path("comments").get(1).path("comment").asText()).isEqualTo("Bug #123 fixed.");
+    }
+
+    @Test
+    void create_WithAdminRole_ShouldReturnCreatedAndTask() {
+        // Given:
+        TaskRequestDto request = TaskRequestDto.builder()
+                .title("New Test Task")
+                .description("This is a test task for test.")
+                .taskStatusId(1L)
+                .taskPriorityId(2L)
+                .authorId(1L)
+                .assigneeId(null)
+                .build();
+
+        TaskResponseDto expected = TaskResponseDto.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .status("pending")
+                .priority("Normal")
+                .author("Admin")
+                .assignee(null)
+                .build();
+
+        HttpEntity<TaskRequestDto> entity = new HttpEntity<>(request, adminHeaders);
+
+        // When:
+        ResponseEntity<TaskResponseDto> response = restTemplate.exchange(
+                baseUrl + "/",
+                HttpMethod.POST,
+                entity,
+                TaskResponseDto.class
+        );
+
+        // Then:
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+
+        TaskResponseDto actual = response.getBody();
+
+        assertThat(actual.getId()).isNotNull();
+        assertThat(actual.getCreatedAt()).isNotNull();
+        assertThat(actual.getUpdatedAt()).isNotNull();
+
+        assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields("id", "createdAt", "updatedAt", "author")
+                .isEqualTo(expected);
+
+        // Cleanup:
+        taskRepository.findById(actual.getId()).ifPresent(taskRepository::delete);
+        assertThat(taskRepository.findById(actual.getId()))
+                .as("Task with id: {} should be delete form DB", actual.getId())
+                .isEmpty();
+    }
+
+    @Test
+    void create_WithUserRole_ShouldReturn403ForbiddenAndErrorResponse() {
+        // Given:
+        TaskRequestDto request = TaskRequestDto.builder()
+                .title("Forbidden Task Creation")
+                .description("Attempt to create task without admin privileges.")
+                .taskStatusId(1L)
+                .taskPriorityId(2L)
+                .authorId(1L)
+                .assigneeId(null)
+                .build();
+
+        HttpEntity<TaskRequestDto> entity = new HttpEntity<>(request, userHeaders);
+
+        // When:
+        ResponseEntity<ErrorResponse> response = restTemplate.exchange(
+                baseUrl + "/",
+                HttpMethod.POST,
+                entity,
+                ErrorResponse.class
+        );
+
+        // Then:
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        ErrorResponse error = response.getBody();
+
+        assertThat(error.getType()).containsIgnoringCase("/errors/forbidden_access");
+        assertThat(error.getTitle()).containsIgnoringCase("forbidden access");
+        assertThat(error.getStatus()).isEqualTo(403);
     }
 
     @Test
@@ -229,6 +400,24 @@ class TaskControllerTest extends BaseIntegrationTest {
                 Void.class
         );
         assertThat(verifyDeleted.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    private String getJwtToken(String email, String password) {
+        SignInRequestDto signInRequestDto = SignInRequestDto.builder()
+                .email(email)
+                .password(password)
+                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<SignInRequestDto> signInEntity = new HttpEntity<>(signInRequestDto, headers);
+
+        String signInUrl = "/api/v1/auth/sign-in";
+        ResponseEntity<JwtAuthenticationResponseDto> signInResponse = restTemplate.postForEntity(
+                signInUrl, signInEntity, JwtAuthenticationResponseDto.class
+        );
+
+        assertThat(signInResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return signInResponse.getBody().getAccessToken();
     }
 
 }

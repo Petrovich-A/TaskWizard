@@ -1,9 +1,12 @@
 package by.petrovich.taskwizard;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -16,6 +19,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseIntegrationTest {
     private static final Logger logger = LoggerFactory.getLogger(BaseIntegrationTest.class);
+
+    @Autowired
+    protected TestRestTemplate restTemplate;
+
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     @Container
     @ServiceConnection
