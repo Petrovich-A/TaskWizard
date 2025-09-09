@@ -1,6 +1,8 @@
 package by.petrovich.taskwizard.config;
 
+import by.petrovich.taskwizard.security.CustomAccessDeniedHandler;
 import by.petrovich.taskwizard.security.JwtAuthenticationFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -22,6 +25,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtAuthenticationFilter authenticationFilter;
     private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final ObjectMapper objectMapper;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
@@ -46,6 +51,7 @@ public class SecurityConfig {
                 }).httpBasic(Customizer.withDefaults());
 
         http.exceptionHandling(exception -> exception
+                .accessDeniedHandler(customAccessDeniedHandler)
                 .authenticationEntryPoint(authenticationEntryPoint));
 
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);

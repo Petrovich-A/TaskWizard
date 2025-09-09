@@ -387,8 +387,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TaskResponse'
-        '404':
-          description: Task not found
         '401':
           description: Unauthorized
           content:
@@ -400,6 +398,15 @@ paths:
                   $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseTaskNotFoundExample'
 
     delete:
       tags:
@@ -577,6 +584,13 @@ paths:
                   $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
         '403':
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseForbiddenExample'
 
     put:
       tags:
@@ -1938,6 +1952,16 @@ components:
   # examples
 
   examples:
+    ErrorResponseInvalidInputExample:
+      summary: Example of invalid input
+      value:
+        type: "/errors/invalid_input"
+        title: "invalid input"
+        status: 400
+        detail: "Some field is invalid."
+        instance: "/api/v1/auth/sign-in"
+        timestamp: "2025-09-04 19:30:00"
+
     ErrorResponseUnauthorizedExample:
       summary: Example of general unauthorized
       value:
@@ -1948,15 +1972,15 @@ components:
         instance: "/api/v1/auth/sign-in"
         timestamp: "2025-09-04 19:10:01"
 
-    ErrorResponseInvalidInputExample:
-      summary: Example of invalid input
+    ErrorResponseForbiddenExample:
+      summary: Example of general unauthorized
       value:
-        type: "/errors/invalid_input"
-        title: "invalid input"
-        status: 400
-        detail: "Some field is invalid."
-        instance: "/api/v1/auth/sign-in"
-        timestamp: "2025-09-04 19:30:00"
+        type: "/errors/forbidden_access"
+        title: "forbidden access"
+        status: 403
+        detail: "Access is denied. You do not have sufficient privileges to access this resource."
+        instance: "/api/v1/task/"
+        timestamp: "2025-09-04 19:10:00"
 
     ErrorResponseBadCredentialsExample:
       summary: Example of bad credentials
@@ -1977,6 +2001,16 @@ components:
         detail: "Authentication failed: User not found with email: user@example.com."
         instance: "/api/v1/auth/sign-in"
         timestamp: "2025-09-04 19:21:22"
+
+    ErrorResponseTaskNotFoundExample:
+      summary: Example of task not found
+      value:
+        type: "/errors/entity_not_found"
+        title: "entity not found"
+        status: 404
+        detail: "The requested Task was not found."
+        instance: "/api/v1/task/99"
+        timestamp: "2025-09-09 08:00:00"
 
 
   securitySchemes:

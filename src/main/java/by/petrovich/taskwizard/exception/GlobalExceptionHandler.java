@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -94,6 +95,26 @@ public class GlobalExceptionHandler {
         );
 
         return buildResponseEntity(ErrorType.BAD_CREDENTIALS.getStatus(), errorResponse);
+    }
+
+    /**
+     * Handles AuthorizationDeniedException (authorization denials, such as insufficient roles or permissions).
+     *
+     * @param e       the AuthorizationDeniedException instance
+     * @param request the HTTP request object
+     * @return ResponseEntity with ErrorResponse
+     */
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(
+            AuthorizationDeniedException e, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = ErrorResponse.build(
+                ErrorType.FORBIDDEN_ACCESS.name(),
+                ErrorType.FORBIDDEN_ACCESS.getStatus().value(),
+                ErrorType.FORBIDDEN_ACCESS.getDescription(),
+                request.getRequestURI());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
     /**
