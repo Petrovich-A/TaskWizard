@@ -1,8 +1,10 @@
 package by.petrovich.taskwizard.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -36,6 +38,8 @@ import static by.petrovich.taskwizard.constant.Constant.DATE_TIME_FORMAT_PATTERN
  */
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ErrorResponse {
     private String type;
 

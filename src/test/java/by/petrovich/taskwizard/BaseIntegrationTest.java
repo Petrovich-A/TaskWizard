@@ -1,15 +1,21 @@
-package by.petrovich.taskwizard.config;
+package by.petrovich.taskwizard;
 
+import org.junit.jupiter.api.TestInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-@TestConfiguration(proxyBeanMethods = false)
-public class TestContainersConfig {
-    private static final Logger logger = LoggerFactory.getLogger(TestContainersConfig.class);
+@Testcontainers
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public abstract class BaseIntegrationTest {
+    private static final Logger logger = LoggerFactory.getLogger(BaseIntegrationTest.class);
 
     @Container
     @ServiceConnection
@@ -18,7 +24,6 @@ public class TestContainersConfig {
             .withUsername("testuser")
             .withPassword("testpass")
             .withExposedPorts(5432)
-            .withReuse(false)
             .withLogConsumer(outputFrame ->
                     logger.info("POSTGRES: {}", outputFrame.getUtf8String().trim()));
 
@@ -36,4 +41,5 @@ public class TestContainersConfig {
     public static PostgreSQLContainer<?> getPostgres() {
         return postgres;
     }
+
 }

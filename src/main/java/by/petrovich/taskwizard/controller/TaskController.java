@@ -123,7 +123,7 @@ public class TaskController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> delete(@PathVariable @Positive Long id) {
         taskService.delete(id);
-        return ResponseEntity.status(NO_CONTENT).body("Task deleted");
+        return ResponseEntity.status(NO_CONTENT).build();
     }
 
 }

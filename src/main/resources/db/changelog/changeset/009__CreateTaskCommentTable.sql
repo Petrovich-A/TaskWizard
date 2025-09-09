@@ -7,6 +7,12 @@ CREATE TABLE task_comment
     user_id    BIGINT       NOT NULL,
     PRIMARY KEY (id),
 
-    CONSTRAINT fk_task_comment_task FOREIGN KEY (task_id) REFERENCES task (id),
-    CONSTRAINT fk_task_comment_user FOREIGN KEY (user_id) REFERENCES task (id)
+    CONSTRAINT fk_task_comment_task
+        FOREIGN KEY (task_id) REFERENCES task (id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE,
+    CONSTRAINT fk_task_comment_user
+        FOREIGN KEY (user_id) REFERENCES task (id)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE
 );

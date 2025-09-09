@@ -1,13 +1,13 @@
 package by.petrovich.taskwizard;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.TestInstance;
 
-@SpringBootTest
-class TaskwizardApplicationTests {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class TaskwizardApplicationTests extends BaseIntegrationTest {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }

@@ -1,6 +1,6 @@
 package by.petrovich.taskwizard.controller;
 
-import by.petrovich.taskwizard.config.TestContainersConfig;
+import by.petrovich.taskwizard.BaseIntegrationTest;
 import by.petrovich.taskwizard.dto.request.SignInRequestDto;
 import by.petrovich.taskwizard.dto.request.SignUpRequestDto;
 import by.petrovich.taskwizard.dto.response.JwtAuthenticationResponseDto;
@@ -15,9 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -26,11 +24,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Tag("integration")
-@Import(TestContainersConfig.class)
-class AuthControllerTest {
-    private final Logger logger = LoggerFactory.getLogger(TestContainersConfig.class);
+class AuthControllerTest extends BaseIntegrationTest {
+    private final Logger logger = LoggerFactory.getLogger(AuthControllerTest.class);
 
     @Autowired
     private TestRestTemplate restTemplate;

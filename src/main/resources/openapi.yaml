@@ -401,6 +401,38 @@ paths:
         '403':
           description: Forbidden
 
+    delete:
+      tags:
+        - Tasks
+      summary: Delete task
+      description: Delete a task. Accessible only by ADMIN role.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '204':
+          description: Task deleted successfully
+        '404':
+          description: Task not found
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
+        '403':
+          description: Forbidden
+
   /task/author/{authorId}:
     get:
       tags:
@@ -576,38 +608,6 @@ paths:
                 $ref: '#/components/schemas/TaskResponse'
         '400':
           description: Invalid input data
-        '404':
-          description: Task not found
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                unauthorized:
-                  $ref: '#/components/examples/ErrorResponseUnauthorizedExample'
-        '403':
-          description: Forbidden
-
-    delete:
-      tags:
-        - Tasks
-      summary: Delete task
-      description: Delete a task. Accessible only by ADMIN role.
-      security:
-        - bearerAuth: [ ]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-      responses:
-        '204':
-          description: Task deleted successfully
         '404':
           description: Task not found
         '401':
