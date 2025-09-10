@@ -366,7 +366,7 @@ class TaskControllerTest extends BaseIntegrationTest {
 
     @Test
     void update_WithAdminRole_ShouldReturnOkAndUpdatedTask() {
-        // Create task
+        // Create a temporary task for the test (to avoid affecting real data)
         TaskRequestDto createRequest = TaskRequestDto.builder()
                 .title("Original Title")
                 .description("Original Description")
@@ -440,6 +440,93 @@ class TaskControllerTest extends BaseIntegrationTest {
 
         assertThat(taskRepository.findById(createdTaskId))
                 .as("Task with ID {} should be deleted from DB", createdTaskId)
+                .isEmpty();
+    }
+
+    @Test
+    void updateStatus_WithUserRole_ShouldReturnOkAndUpdatedStatus() {
+        // Create a temporary task for the test (to avoid affecting real data)
+        TaskRequestDto createRequest = TaskRequestDto.builder()
+                .title("Test Task for Status Update")
+                .description("Description")
+                .taskStatusId(1L)
+                .taskPriorityId(1L)
+                .authorId(1L)
+                .assigneeId(16L)
+                .build();
+
+        HttpEntity<TaskRequestDto> createEntity = new HttpEntity<>(createRequest, adminHeaders);
+        logger.info("Sending POST to create task: " + createEntity.getBody().getTitle());
+
+        ResponseEntity<TaskResponseDto> createResponse = restTemplate.exchange(
+                baseUrl + "/",
+                HttpMethod.POST,
+                createEntity,
+                TaskResponseDto.class
+        );
+
+        logger.info("Created task ID: {}", createResponse.getBody().getId());
+
+        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        TaskResponseDto createdTask = createResponse.getBody();
+        assertThat(createdTask).isNotNull();
+
+        Long taskIdForUpdate = createdTask.getId();
+
+        // Given:
+        Long statusIdToUpdate = 2L;
+
+        TaskRequestDto updateRequest = TaskRequestDto.builder()
+                .title(createRequest.getTitle())
+                .description(createRequest.getDescription())
+                .taskStatusId(statusIdToUpdate)
+                .taskPriorityId(createRequest.getTaskPriorityId())
+                .authorId(createRequest.getAuthorId())
+                .assigneeId(createRequest.getAssigneeId())
+                .build();
+
+        TaskResponseDto expectedUpdatedResponse = TaskResponseDto.builder()
+                .id(taskIdForUpdate)
+                .title(updateRequest.getTitle())
+                .description(updateRequest.getDescription())
+                .status("in_progress")
+                .priority("Critical")
+                .author("Alice")
+                .assignee("Dave")
+                .comments(new ArrayList<>())
+                .build();
+
+        HttpEntity<TaskRequestDto> updateEntity = new HttpEntity<>(updateRequest, userHeaders);
+
+        // When:
+        ResponseEntity<TaskResponseDto> actualResponseAfterUpdate = restTemplate.exchange(
+                baseUrl + "/" + taskIdForUpdate + "/status?statusId=" + statusIdToUpdate,
+                HttpMethod.PATCH,
+                updateEntity,
+                TaskResponseDto.class
+        );
+
+        // Then
+        assertThat(actualResponseAfterUpdate.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(actualResponseAfterUpdate.getBody()).isNotNull();
+
+        TaskResponseDto actualResponse = actualResponseAfterUpdate.getBody();
+        assertThat(actualResponse.getId()).isEqualTo(taskIdForUpdate);
+        assertThat(actualResponse.getStatus()).isEqualTo("in_progress");
+        assertThat(actualResponse.getUpdatedAt()).isAfter(createdTask.getUpdatedAt());
+
+        // Compare without dynamic fields
+        assertThat(actualResponse)
+                .usingRecursiveComparison()
+                .ignoringFields("id", "createdAt", "updatedAt")
+                .isEqualTo(expectedUpdatedResponse);
+
+        // Cleanup
+        taskRepository.deleteById(taskIdForUpdate);
+        logger.info("Cleanup completed - verifying task deletion");
+
+        assertThat(taskRepository.findById(taskIdForUpdate))
+                .as("Task with ID {} should be deleted from DB", taskIdForUpdate)
                 .isEmpty();
     }
 
