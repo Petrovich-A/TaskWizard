@@ -1494,12 +1494,12 @@ components:
         createdAt:
           type: string
           format: date-time
-          example: "2024-01-15 10:30:00"
+          example: "2024-01-15T10:30:00"
           description: User creation timestamp
         updatedAt:
           type: string
           format: date-time
-          example: "2024-01-15 10:30:00"
+          example: "2024-01-15T10:30:00"
           description: Last update timestamp
         authoredTaskIds:
           type: array
@@ -1583,12 +1583,12 @@ components:
         createdAt:
           type: string
           format: date-time
-          example: "2024-01-15 10:30:00"
+          example: "2024-01-15T10:30:00"
           description: Creation timestamp
         updatedAt:
           type: string
           format: date-time
-          example: "2024-01-15 11:45:00"
+          example: "2024-01-15T11:45:00"
           description: Last update timestamp
         status:
           type: string
@@ -1706,7 +1706,7 @@ components:
         timestamp:
           type: string
           format: date-time
-          example: "2024-01-15 10:30:00"
+          example: "2024-01-15T10:30:00"
           description: Error timestamp
         status:
           type: integer
@@ -1771,7 +1771,7 @@ components:
         createdAt:
           type: string
           format: date-time
-          example: "2024-01-15 12:00:00"
+          example: "2024-01-15T12:00:00"
           description: Comment creation timestamp
         author:
           type: string
@@ -1861,7 +1861,7 @@ components:
         updatedAt:
           type: string
           format: date-time
-          example: "2024-01-15 10:30:00"
+          example: "2024-01-15T10:30:00"
           description: Last update timestamp
 
     # users
@@ -1922,12 +1922,12 @@ components:
         createdAt:
           type: string
           format: date-time
-          example: "2024-01-15 10:30:00"
+          example: "2024-01-15T10:30:00"
           description: User creation timestamp
         updatedAt:
           type: string
           format: date-time
-          example: "2024-01-15 10:30:00"
+          example: "2024-01-15T10:30:00"
           description: Last update timestamp
         authoredTaskIds:
           type: array
@@ -1960,7 +1960,7 @@ components:
         status: 400
         detail: "Some field is invalid."
         instance: "/api/v1/auth/sign-in"
-        timestamp: "2025-09-04 19:30:00"
+        timestamp: "2025-09-04T19:30:00"
 
     ErrorResponseUnauthorizedExample:
       summary: Example of general unauthorized
@@ -1970,7 +1970,7 @@ components:
         status: 401
         detail: "Access is denied. Authorization is required."
         instance: "/api/v1/auth/sign-in"
-        timestamp: "2025-09-04 19:10:01"
+        timestamp: "2025-09-04T19:10:01"
 
     ErrorResponseForbiddenExample:
       summary: Example of general unauthorized
@@ -1980,7 +1980,7 @@ components:
         status: 403
         detail: "Access is denied. You do not have sufficient privileges to access this resource."
         instance: "/api/v1/task/"
-        timestamp: "2025-09-04 19:10:00"
+        timestamp: "2025-09-04T19:10:00"
 
     ErrorResponseBadCredentialsExample:
       summary: Example of bad credentials
@@ -1990,7 +1990,7 @@ components:
         status: 401
         detail: "Authentication failed. Please check your credentials."
         instance: "/api/v1/auth/sign-in"
-        timestamp: "2025-09-04 19:27:36"
+        timestamp: "2025-09-04T19:27:36"
 
     ErrorResponseUserNotFoundDuringAuthenticationExample:
       summary: Example of user not found during authentication
@@ -2000,7 +2000,7 @@ components:
         status: 404
         detail: "Authentication failed: User not found with email: user@example.com."
         instance: "/api/v1/auth/sign-in"
-        timestamp: "2025-09-04 19:21:22"
+        timestamp: "2025-09-04T19:21:22"
 
     ErrorResponseTaskNotFoundExample:
       summary: Example of task not found
@@ -2010,7 +2010,7 @@ components:
         status: 404
         detail: "The requested Task was not found."
         instance: "/api/v1/task/99"
-        timestamp: "2025-09-09 08:00:00"
+        timestamp: "2025-09-09T08:00:00"
 
 
   securitySchemes:

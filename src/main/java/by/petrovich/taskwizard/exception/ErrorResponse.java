@@ -8,30 +8,25 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import static by.petrovich.taskwizard.constant.Constant.DATE_TIME_FORMAT_PATTERN;
-
 /**
  * Represents a standardized error response conforming to RFC 7807,
- * designed to provide consistent and clear error information in HTTP APIs.
+ * for consistent error reporting in HTTP APIs.
  *
- * <p>This class encapsulates details about an error occurring during API
- * processing, making it easier for clients to interpret and handle errors.</p>
+ * <p>This class provides structured details about API errors,
+ * simplifying client-side handling.</p>
  *
- * <p>Fields:</p>
+ * <p>Key fields:</p>
  * <ul>
- *     <li><b>type</b>: URI identifying the error type, formatted as "/errors/{type}".
- *         Typically derived from an {@link ErrorType} enum name in lowercase.</li>
- *     <li><b>title</b>: Human-readable, simplified error type name (underscores replaced by spaces, lowercase).</li>
- *     <li><b>status</b>: HTTP status code associated with the error, matching {@link ErrorType#getStatus()}.</li>
- *     <li><b>detail</b>: Specific explanation of this error occurrence, often formatted from
- *         {@link ErrorType#getDescription()} with relevant parameters.</li>
- *     <li><b>instance</b>: URI identifying the particular occurrence of this error (e.g., request URI).</li>
- *     <li><b>timestamp</b>: Date and time when the error happened, formatted as "yyyy-MM-dd HH:mm:ss".</li>
+ *     <li><b>type</b>: URI for error type (e.g., "/errors/{type}" from {@link ErrorType} in lowercase).</li>
+ *     <li><b>title</b>: Human-readable error name (underscores to spaces, lowercase).</li>
+ *     <li><b>status</b>: HTTP status code, matching {@link ErrorType#getStatus()}.</li>
+ *     <li><b>detail</b>: Specific error explanation, based on {@link ErrorType#getDescription()}.</li>
+ *     <li><b>instance</b>: URI of the error occurrence (e.g., request URI).</li>
+ *     <li><b>timestamp</b>: ISO 8601 date/time of error (e.g., "2024-01-01T12:00:00").</li>
  * </ul>
  *
- * <p>The static {@code build} method simplifies constructing an instance by formatting
- * {@code type} and {@code title} from the error type, setting the status, detail message,
- * instance URI, and timestamp automatically.</p>
+ * <p>The {@code build} method constructs an instance automatically,
+ * formatting type, title, and setting status, detail, instance, and current timestamp.</p>
  *
  * <p>This structure promotes uniformity in error reporting and eases client error handling,
  * leveraging the {@link ErrorType} enum for predefined error categories and messages.</p>
@@ -51,7 +46,7 @@ public class ErrorResponse {
 
     private String instance;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT_PATTERN)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime timestamp;
 
     public static ErrorResponse build(String type, int status, String detail, String instance) {

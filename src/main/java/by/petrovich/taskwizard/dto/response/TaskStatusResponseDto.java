@@ -6,8 +6,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-import static by.petrovich.taskwizard.constant.Constant.DATE_TIME_FORMAT_PATTERN;
-
 @Data
 @Builder
 public class TaskStatusResponseDto {
@@ -15,7 +13,7 @@ public class TaskStatusResponseDto {
 
     private String name;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT_PATTERN)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime updatedAt;
 
 }

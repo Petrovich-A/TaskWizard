@@ -432,8 +432,8 @@ class TaskControllerTest extends BaseIntegrationTest {
                 .usingRecursiveComparison()
                 .ignoringFields("createdAt", "updatedAt")
                 .isEqualTo(expectedUpdatedResponse);
-/// TODO: 10.09.2025 millisecond? 
-        assertThat(actualUpdatedResponse.getUpdatedAt()).isAfterOrEqualTo(createResponse.getBody().getUpdatedAt());
+
+        assertThat(actualUpdatedResponse.getUpdatedAt()).isAfter(createResponse.getBody().getUpdatedAt());
 
         // Cleanup
         taskRepository.deleteById(createdTaskId);
