@@ -22,9 +22,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -365,7 +365,85 @@ class TaskControllerTest extends BaseIntegrationTest {
     }
 
     @Test
-    @Transactional
+    void update_WithAdminRole_ShouldReturnOkAndUpdatedTask() {
+        // Create task
+        TaskRequestDto createRequest = TaskRequestDto.builder()
+                .title("Original Title")
+                .description("Original Description")
+                .taskStatusId(1L)
+                .taskPriorityId(1L)
+                .authorId(1L)
+                .assigneeId(null)
+                .build();
+
+        HttpEntity<TaskRequestDto> createEntity = new HttpEntity<>(createRequest, adminHeaders);
+
+        ResponseEntity<TaskResponseDto> createResponse = restTemplate.exchange(
+                baseUrl + "/",
+                HttpMethod.POST,
+                createEntity,
+                TaskResponseDto.class
+        );
+
+        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        TaskResponseDto createdTask = createResponse.getBody();
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getId()).isNotNull();
+
+        Long createdTaskId = createdTask.getId();
+
+        // Given
+        TaskRequestDto updateRequest = TaskRequestDto.builder()
+                .title("Updated Title")
+                .description("Updated Description")
+                .taskStatusId(2L)
+                .taskPriorityId(2L)
+                .authorId(1L)
+                .assigneeId(6L)
+                .build();
+
+        TaskResponseDto expectedUpdatedResponse = TaskResponseDto.builder()
+                .id(createdTaskId)
+                .title(updateRequest.getTitle())
+                .description(updateRequest.getDescription())
+                .status("in_progress")
+                .priority("Normal")
+                .author("Alice")
+                .assignee("Bob")
+                .comments(new ArrayList<>())
+                .build();
+
+        HttpEntity<TaskRequestDto> updateEntity = new HttpEntity<>(updateRequest, adminHeaders);
+
+        // When
+        ResponseEntity<TaskResponseDto> updateResponse = restTemplate.exchange(
+                baseUrl + "/" + createdTaskId,
+                HttpMethod.PUT,
+                updateEntity,
+                TaskResponseDto.class
+        );
+
+        // Then
+        assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        TaskResponseDto actualUpdatedResponse = updateResponse.getBody();
+        assertThat(actualUpdatedResponse).isNotNull();
+
+        assertThat(actualUpdatedResponse)
+                .usingRecursiveComparison()
+                .ignoringFields("createdAt", "updatedAt")
+                .isEqualTo(expectedUpdatedResponse);
+/// TODO: 10.09.2025 millisecond? 
+        assertThat(actualUpdatedResponse.getUpdatedAt()).isAfterOrEqualTo(createResponse.getBody().getUpdatedAt());
+
+        // Cleanup
+        taskRepository.deleteById(createdTaskId);
+
+        assertThat(taskRepository.findById(createdTaskId))
+                .as("Task with ID {} should be deleted from DB", createdTaskId)
+                .isEmpty();
+    }
+
+    @Test
     void deleteTask_WithAdminRole_ShouldDeleteSuccessfully() {
         Long taskId = 1L;
         HttpEntity<Void> entity = new HttpEntity<>(adminHeaders);
