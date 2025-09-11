@@ -303,17 +303,10 @@ class TaskControllerTest extends BaseIntegrationTest {
         HttpEntity<TaskRequestDto> entity = new HttpEntity<>(request, adminHeaders);
 
         // When:
-        ResponseEntity<TaskResponseDto> response = restTemplate.exchange(
-                baseUrl + "/",
-                HttpMethod.POST,
-                entity,
-                TaskResponseDto.class
-        );
+        ResponseEntity<TaskResponseDto> response = sendPostRequest(baseUrl + "/", entity, TaskResponseDto.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
         // Then:
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isNotNull();
-
         TaskResponseDto actual = response.getBody();
 
         assertThat(actual.getId()).isNotNull();
@@ -347,21 +340,15 @@ class TaskControllerTest extends BaseIntegrationTest {
         HttpEntity<TaskRequestDto> entity = new HttpEntity<>(request, userHeaders);
 
         // When:
-        ResponseEntity<ErrorResponse> response = restTemplate.exchange(
-                baseUrl + "/",
-                HttpMethod.POST,
-                entity,
-                ErrorResponse.class
-        );
+        ResponseEntity<ErrorResponse> response = sendPostRequest(baseUrl + "/", entity, ErrorResponse.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 
         // Then:
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(response.getBody()).isNotNull();
-        ErrorResponse error = response.getBody();
+        ErrorResponse errorResponse = response.getBody();
 
-        assertThat(error.getType()).containsIgnoringCase("/errors/forbidden_access");
-        assertThat(error.getTitle()).containsIgnoringCase("forbidden access");
-        assertThat(error.getStatus()).isEqualTo(403);
+        assertThat(errorResponse.getType()).containsIgnoringCase("/errors/forbidden_access");
+        assertThat(errorResponse.getTitle()).containsIgnoringCase("forbidden access");
+        assertThat(errorResponse.getStatus()).isEqualTo(403);
     }
 
     @Test
@@ -378,14 +365,9 @@ class TaskControllerTest extends BaseIntegrationTest {
 
         HttpEntity<TaskRequestDto> createEntity = new HttpEntity<>(createRequest, adminHeaders);
 
-        ResponseEntity<TaskResponseDto> createResponse = restTemplate.exchange(
-                baseUrl + "/",
-                HttpMethod.POST,
-                createEntity,
-                TaskResponseDto.class
-        );
-
+        ResponseEntity<TaskResponseDto> createResponse = sendPostRequest(baseUrl + "/", createEntity, TaskResponseDto.class);
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
         TaskResponseDto createdTask = createResponse.getBody();
         assertThat(createdTask).isNotNull();
         assertThat(createdTask.getId()).isNotNull();
@@ -458,16 +440,9 @@ class TaskControllerTest extends BaseIntegrationTest {
         HttpEntity<TaskRequestDto> createEntity = new HttpEntity<>(createRequest, adminHeaders);
         logger.info("Sending POST to create task: " + createEntity.getBody().getTitle());
 
-        ResponseEntity<TaskResponseDto> createResponse = restTemplate.exchange(
-                baseUrl + "/",
-                HttpMethod.POST,
-                createEntity,
-                TaskResponseDto.class
-        );
-
-        logger.info("Created task ID: {}", createResponse.getBody().getId());
-
+        ResponseEntity<TaskResponseDto> createResponse = sendPostRequest(baseUrl + "/", createEntity, TaskResponseDto.class);
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
         TaskResponseDto createdTask = createResponse.getBody();
         assertThat(createdTask).isNotNull();
 

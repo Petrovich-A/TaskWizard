@@ -51,22 +51,17 @@ class AuthControllerTest extends BaseIntegrationTest {
                 .password(password)
                 .build();
 
-        logger.info("Attempting to register user with email: {}", email);
-
         // When
         ResponseEntity<UserResponseDto> actualResponse = restTemplate.postForEntity(
                 baseUrl + "/sign-up",
                 signUpRequestDto,
                 UserResponseDto.class
         );
-
-        logger.info("Sign-up request completed with status: {}", actualResponse.getStatusCode());
+        assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(actualResponse.getBody()).isNotNull();
 
         // Then
-        assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-
         UserResponseDto actualBody = actualResponse.getBody();
-        assertThat(actualResponse.getBody()).isNotNull();
 
         assertThat(actualBody.getId()).isNotNull().isPositive();
         assertThat(actualBody.getName()).isEqualTo(userName);
@@ -74,8 +69,8 @@ class AuthControllerTest extends BaseIntegrationTest {
 
         assertThat(actualBody.getCreatedAt()).isNotNull();
         assertThat(actualBody.getUpdatedAt()).isNotNull();
-        assertThat(actualBody.getCreatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
-        assertThat(actualBody.getUpdatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
+        assertThat(actualBody.getCreatedAt()).isBefore(LocalDateTime.now());
+        assertThat(actualBody.getUpdatedAt()).isBefore(LocalDateTime.now());
         assertThat(actualBody.getCreatedAt()).isEqualTo(actualBody.getUpdatedAt());
 
         assertThat(actualBody.getAuthoredTaskIds()).isNotNull();
