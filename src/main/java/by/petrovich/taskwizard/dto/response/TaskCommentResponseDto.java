@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import static by.petrovich.taskwizard.constant.Constant.DATE_TIME_FORMAT_PATTERN;
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -19,7 +17,7 @@ public class TaskCommentResponseDto {
 
     private String comment;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT_PATTERN)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;
 
     private String author;

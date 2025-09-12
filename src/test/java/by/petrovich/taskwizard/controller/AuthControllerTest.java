@@ -1,6 +1,6 @@
 package by.petrovich.taskwizard.controller;
 
-import by.petrovich.taskwizard.config.TestContainersConfig;
+import by.petrovich.taskwizard.BaseIntegrationTest;
 import by.petrovich.taskwizard.dto.request.SignInRequestDto;
 import by.petrovich.taskwizard.dto.request.SignUpRequestDto;
 import by.petrovich.taskwizard.dto.response.JwtAuthenticationResponseDto;
@@ -15,9 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -26,14 +23,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Tag("integration")
-@Import(TestContainersConfig.class)
-class AuthControllerTest {
-    private final Logger logger = LoggerFactory.getLogger(TestContainersConfig.class);
-
-    @Autowired
-    private TestRestTemplate restTemplate;
+class AuthControllerTest extends BaseIntegrationTest {
+    private final Logger logger = LoggerFactory.getLogger(AuthControllerTest.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -59,22 +51,17 @@ class AuthControllerTest {
                 .password(password)
                 .build();
 
-        logger.info("Attempting to register user with email: {}", email);
-
         // When
         ResponseEntity<UserResponseDto> actualResponse = restTemplate.postForEntity(
                 baseUrl + "/sign-up",
                 signUpRequestDto,
                 UserResponseDto.class
         );
-
-        logger.info("Sign-up request completed with status: {}", actualResponse.getStatusCode());
+        assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(actualResponse.getBody()).isNotNull();
 
         // Then
-        assertThat(actualResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-
         UserResponseDto actualBody = actualResponse.getBody();
-        assertThat(actualResponse.getBody()).isNotNull();
 
         assertThat(actualBody.getId()).isNotNull().isPositive();
         assertThat(actualBody.getName()).isEqualTo(userName);
@@ -82,8 +69,8 @@ class AuthControllerTest {
 
         assertThat(actualBody.getCreatedAt()).isNotNull();
         assertThat(actualBody.getUpdatedAt()).isNotNull();
-        assertThat(actualBody.getCreatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
-        assertThat(actualBody.getUpdatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
+        assertThat(actualBody.getCreatedAt()).isBefore(LocalDateTime.now());
+        assertThat(actualBody.getUpdatedAt()).isBefore(LocalDateTime.now());
         assertThat(actualBody.getCreatedAt()).isEqualTo(actualBody.getUpdatedAt());
 
         assertThat(actualBody.getAuthoredTaskIds()).isNotNull();

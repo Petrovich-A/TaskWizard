@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedSourcePolicy = ReportingPolicy.WARN)
@@ -19,10 +18,6 @@ public interface TaskStatusMapper {
 
     @Mapping(target = "id", ignore = true)
     TaskStatus toEntityUpdate(TaskStatusRequestDto taskStatusRequestDto, @MappingTarget TaskStatus taskStatus);
-
-    @Mapping(target = "id", source = "id")
-    @Named("mapStatus")
-    TaskStatus mapStatus(Long id);
 
     default String toName(TaskStatus taskStatus) {
         return taskStatus != null ? taskStatus.getName() : null;

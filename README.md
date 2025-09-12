@@ -159,6 +159,6 @@ To run the application outside Docker for development:
 ## Contact
 
 👤 **Petrovich Alexandr**
-Petrovich Alexandr - [@Petrovich Alexandr](https://www.linkedin.com/in/alexandr-petrovich/)
+[@Petrovich Alexandr](https://www.linkedin.com/in/alexandr-petrovich/)
 
 📩 a.piatrovich@gmail.com
